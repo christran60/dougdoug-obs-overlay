@@ -155,8 +155,13 @@ Edit the `menuDB` array in the JavaScript section:
 - **Crop First**: Always crop out the admin panel before going live
 - **Chroma Key**: Use the green background (#00b140) for easy chroma key removal in OBS
 
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
 ## Credits
 
 - Made by [@sixtyvari0us](https://twitter.com/sixtyvari0us)
 - Designed for DougDoug food challenge streams
+- Built with vanilla HTML, CSS, and JavaScript
 
