@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DougDoug Food Challenge Tracker (Compact List)</title>
+    <style>
+        /* Load fancy fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@700;900&display=swap');
+
+        :root {
+            /* Theme Colors */
+            --primary: #978DB9; 
+            --primary-glow: rgba(151, 141, 185, 0.6);
+            --bg-glass: rgba(16, 16, 20, 1);
+            --text-white: #ffffff;
+            --danger: #ef4444;
+            
+            /* Overlay Width - 600px looks good on 1440p */
+            --overlay-width: 600px; 
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: rgba(0, 0, 0, 0);
+            font-family: 'Nunito', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+
+            /* --- SHARPNESS FIXES --- */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: geometricPrecision; 
+        }
+
+        /* =========================================
+           AREA 1: THE STREAM OVERLAY (HUD)
+           ========================================= */
+        #stream-hud {
+            width: var(--overlay-width);
+            height: 100%;
+            padding: 30px; 
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: 240px 1fr; 
+            grid-template-rows: auto 1fr;
+            gap: 25px;
+            align-content: start;
+            /* Slightly transparent dark for visibility if testing without Chroma Key */
+            background-color: #00b140; 
+        }
+
+        /* --- Left Column: Stats & Restaurants --- */
+        .hud-left-col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-height: 100vh; 
+        }
+
+        .hud-card {
+            background: #151515; 
+            border-left: 6px solid var(--primary); 
+            border-radius: 0 16px 16px 0;
+            padding: 15px 20px;
+            box-shadow: 0 6px 8px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            flex-shrink: 0; 
+        }
+
+        .hud-label {
+            font-family: 'Fredoka', 'Segoe UI', Arial, sans-serif;
+            font-size: 14px; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .hud-value {
+            font-size: 56px; 
+            font-weight: 900;
+            color: #fff;
+            line-height: 1;
+            text-shadow: 3px 3px 0 #000, 0 0 5px var(--primary-glow);
+        }
+
+        .hud-unit { font-size: 24px; color: #ccc; font-weight: 700; }
+
+        .hud-list-container {
+            background: #151515;
+            border-radius: 16px;
+            /* Tighter padding to save space */
+            padding: 15px 15px 15px 30px; 
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .hud-title {
+            font-size: 14px; 
+            color: #aaa;
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-bottom: 8px; /* Reduced margin */
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 6px;
+            margin-left: -15px; 
+        }
+
+        /* --- COMPACT LIST --- */
+        .res-list {
+            margin: 0;
+            padding: 0;
+            list-style-type: decimal; 
+            color: var(--primary); 
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+        }
+
+        .res-list li {
+            /* COMPACT SIZE: Reduced from 20px to 17px */
+            font-size: 17px; 
+            /* TIGHTER SPACING: Reduced from 8px to 4px */
+            margin-bottom: 4px; 
+            padding-left: 5px;
+            line-height: 1.2;
+        }
+
+        .res-list-item-content {
+            color: #fff; 
+            display: inline-block;
+            word-wrap: break-word; /* Allow wrapping if absolutely necessary, but avoids cut-off */
+        }
+
+        /* --- Right Column: Players --- */
+        .hud-right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .player-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #151515;
+            padding: 12px 18px; 
+            border-radius: 12px;
+            border: 2px solid rgba(151, 141, 185, 0.4); 
+        }
+
+        .p-name { color: var(--primary); font-weight: 800; font-size: 18px; text-shadow: 1px 1px 0 #000; }
+        .p-stats { color: #fff; font-weight: 700; font-size: 18px; font-family: 'Fredoka', 'Segoe UI', Arial, sans-serif; }
+        .p-stat-detail { font-size: 12px; color: #aaa; margin-left: 2px; }
+
+        /* =========================================
+           AREA 2: ADMIN PANEL
+           ========================================= */
+        #admin-panel {
+            flex: 1;
+            background: #1a1a1a;
+            border-left: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+            min-width: 0;
+            height: 100vh; 
+        }
+
+        .panel-header {
+            padding: 20px 20px 10px 20px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+            flex-shrink: 0;
+        }
+
+        .panel-title { color: #fff; font-size: 18px; font-weight: 800; margin: 0; }
+        .panel-subtitle { color: #666; font-size: 12px; margin: 0; }
+        
+        .maker-link {
+            color: #444; 
+            font-size: 11px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s;
+            display: block;
+            margin-top: 4px;
+        }
+        .maker-link:hover {
+            color: var(--primary);
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto; 
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            background: #252525;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            flex-shrink: 0;
+        }
+
+        .group-label {
+            color: var(--primary);
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Inputs & Selects */
+        input[type="text"], input[type="number"], select {
+            width: 100%; background: #111; border: 1px solid #444; color: #fff;
+            padding: 10px; border-radius: 6px; font-family: 'Nunito', 'Segoe UI', sans-serif;
+            font-size: 13px; margin-bottom: 8px; box-sizing: border-box;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); background: #000; }
+
+        /* Buttons */
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 800; cursor: pointer; 
+               font-family: 'Fredoka', 'Segoe UI', sans-serif; text-transform: uppercase; }
+        .btn-primary { background: var(--primary); color: #000; }
+        .btn-primary:hover { background: #b1a6d3; }
+        .btn-danger { background: #2c1a1a; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; font-size: 11px; width: auto;}
+        .btn-danger:hover { background: var(--danger); color: #fff; }
+        .btn-small { padding: 6px 10px; width: auto; font-size: 12px; }
+
+        /* Player Select Buttons */
+        .player-select-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 8px;
+        }
+
+        .player-select-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #aaa;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'Nunito', 'Segoe UI', sans-serif;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+        .player-select-btn:hover { background: rgba(255,255,255,0.1); }
+        .player-select-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+
+        /* Manage Players List */
+        .manage-player-row { display: flex; gap: 10px; margin-bottom: 6px; align-items: center; }
+        .manage-player-input { background: #111 !important; border: 1px solid #444 !important; margin-bottom: 0 !important; padding: 6px !important; }
+        .manage-player-input:focus { border-color: var(--primary) !important; }
+
+        /* Toggles */
+        .toggle-row { display: flex; align-items: center; gap: 15px; margin-top: 5px; }
+        .toggle-item { display: flex; align-items: center; gap: 6px; }
+        .toggle-label { color: #fff; font-size: 13px; cursor: pointer; }
+
+        /* History Items */
+        .history-item { display: flex; justify-content: space-between; align-items: center; background: #151515; padding: 8px; border-radius: 4px; margin-bottom: 5px; font-size: 12px; color: #ccc; border-left: 2px solid #444; }
+        .history-player-badge { background: #333; color: var(--primary); padding: 2px 6px; border-radius: 4px; font-size: 10px; text-transform: uppercase; font-weight: 700; margin-right: 6px; }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+        /* Autocomplete */
+        .autocomplete-container { position: relative; }
+        .autocomplete-dropdown { 
+            position: absolute; top: 100%; left: 0; right: 0; 
+            background: #000;
+            border: 1px solid #666; 
+            max-height: 150px; overflow-y: auto; 
+            z-index: 99999; 
+            display: none; border-radius: 0 0 6px 6px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .autocomplete-dropdown.show { display: block; }
+        .autocomplete-item { padding: 8px; color: #fff; cursor: pointer; font-size: 12px; }
+        .autocomplete-item:hover { background: var(--primary); color: #000; }
+
+        /* Database Scroll List */
+        .db-scroll-list {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            background: #111;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 4px;
+        }
+
+        .db-list-item {
+            background: #252525;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+
+        .db-list-item:hover {
+            background: #333;
+            border-color: var(--primary);
+        }
+
+        .db-item-name { color: #fff; font-weight: 700; font-size: 13px; }
+        .db-item-sub { color: #888; font-size: 11px; margin-top: 2px;}
+        .db-item-stats { color: var(--primary); font-family: 'Fredoka', sans-serif; font-size: 12px; }
+
+        .hidden { display: none !important; }
+        
+        /* Section Divider */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #555;
+            font-size: 11px;
+            font-weight: 700;
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+        .section-divider::before, .section-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #333;
+        }
+        .section-divider::before { margin-right: 10px; }
+        .section-divider::after { margin-left: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="stream-hud">
+        
+        <div class="hud-left-col">
+            <div class="hud-card">
+                <div class="hud-label">Calories</div>
+                <div class="hud-value" id="hud-cals">0</div>
+            </div>
+            <div class="hud-card" id="hud-fat-card">
+                <div class="hud-label">Fat</div>
+                <div class="hud-value" id="hud-fat">0 <span class="hud-unit">g</span></div>
+            </div>
+            
+            <div class="hud-list-container">
+                <div class="hud-title">Restaurants Visited</div>
+                <div id="hud-restaurants">
+                    <span style="font-size: 12px; color: rgba(255,255,255,0.3); font-style: italic;">No items yet</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-right-col hidden" id="hud-multiplayer-area">
+            </div>
+
+    </div>
+
+
+    <div id="admin-panel">
+        
+        <div class="panel-header">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                    <h2 class="panel-title">Control Panel</h2>
+                    <p class="panel-subtitle">DougDoug Challenge Tracker</p>
+                </div>
+                <a href="https://twitter.com/sixtyvari0us" target="_blank" class="maker-link">made by @sixtyvari0us</a>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-item">
+                    <input type="checkbox" id="toggle-fat" checked onchange="toggleFat()">
+                    <label for="toggle-fat" class="toggle-label">Show Fat</label>
+                </div>
+                <div class="toggle-item">
+                    <input type="checkbox" id="toggle-multiplayer" onchange="toggleMultiplayer()">
+                    <label for="toggle-multiplayer" class="toggle-label">Multiplayer</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-content">
+            
+            <div id="global-player-dashboard" class="control-group player-dashboard hidden">
+                <span class="group-label" style="color: #fff;">WHO IS EATING? (Select Active)</span>
+                <div id="player-buttons-grid" class="player-select-grid"></div>
+            </div>
+
+            <div class="control-group">
+                <span class="group-label">Manual Entry</span>
+                
+                <div class="autocomplete-container">
+                    <input type="text" id="input-chain" placeholder="Restaurant (e.g. McDonalds)" autocomplete="off">
+                    <div id="chain-dropdown" class="autocomplete-dropdown"></div>
+                </div>
+                
+                <input type="text" id="input-item" placeholder="Item Name (e.g. Big Mac)">
+                
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="input-cals" placeholder="Cals" style="flex: 1">
+                    <input type="number" id="input-fat" placeholder="Fat (opt)" style="flex: 1">
+                </div>
+
+                <button class="btn btn-primary" onclick="addManualItem()">ADD ITEM</button>
+            </div>
+
+            <div class="section-divider">OR</div>
+
+            <div class="control-group">
+                <span class="group-label">Menu Database Search</span>
+                
+                <div class="autocomplete-container" style="margin-bottom: 8px;">
+                    <input type="text" id="db-chain-filter" placeholder="Filter by Restaurant..." autocomplete="off">
+                    <div id="db-chain-dropdown" class="autocomplete-dropdown"></div>
+                </div>
+
+                <input type="text" id="db-search" placeholder="Search menu items..." onkeyup="renderDBList()" style="margin-bottom: 10px;">
+                
+                <div id="db-list-container" class="db-scroll-list">
+                    </div>
+            </div>
+
+            <div class="control-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span class="group-label" style="margin:0">Recent History</span>
+                    <button class="btn btn-danger btn-small" onclick="clearAll()">Reset All</button>
+                </div>
+                <div id="history-list">
+                    <div style="text-align:center; color:#555; font-size:12px; padding:10px;">History Empty</div>
+                </div>
+            </div>
+
+            <div id="player-manager" class="control-group hidden">
+                <span class="group-label">Manage Players</span>
+                <div id="manage-players-list"></div>
+                
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 5px;">
+                    <div style="display:flex; gap: 5px;">
+                        <input type="text" id="new-player-input" placeholder="New Player Name" style="margin-bottom: 0;">
+                        <button class="btn btn-primary btn-small" style="width: auto;" onclick="addNewPlayer()">Add</button>
+                    </div>
+                </div>
+            </div>
+            
+        </div> </div>
+
+    <script>
+        /* ================= DATA & STATE ================= */
+        // --- FINALIZED MENU DATABASE (2025) ---
+        const menuDB = [
+
+            // --- GENERAL DRINKS ---
+            { chain: "General Drinks", item: "Large Soda (Coke/Pepsi)", cals: 290, fat: 0 },
+            { chain: "General Drinks", item: "Medium Soda", cals: 200, fat: 0 },
+            { chain: "General Drinks", item: "Small Soda", cals: 150, fat: 0 },
+            { chain: "General Drinks", item: "Bottled Water", cals: 0, fat: 0 },
+            { chain: "General Drinks", item: "Iced Tea (Sweet)", cals: 180, fat: 0 },
+            { chain: "General Drinks", item: "Iced Tea (Unsweet)", cals: 0, fat: 0 },
+            { chain: "General Drinks", item: "Lemonade", cals: 220, fat: 0 },
+            { chain: "General Drinks", item: "Orange Juice", cals: 160, fat: 0 },
+            { chain: "General Drinks", item: "Milkshake (Large)", cals: 700, fat: 20 },
+            { chain: "General Drinks", item: "Milkshake (Medium)", cals: 550, fat: 15 },
+            { chain: "General Drinks", item: "Coffee (Black)", cals: 5, fat: 0 },
+            { chain: "General Drinks", item: "Coffee (Cream/Sugar)", cals: 120, fat: 6 },
+            { chain: "General Drinks", item: "Energy Drink (Red Bull/Monster)", cals: 110, fat: 0 },
+
+            // --- MCDONALD'S ---
+            { chain: "McDonalds", item: "Big Mac", cals: 590, fat: 34 },
+            { chain: "McDonalds", item: "Quarter Pounder w/ Cheese", cals: 520, fat: 26 },
+            { chain: "McDonalds", item: "Double Quarter Pounder", cals: 740, fat: 42 },
+            { chain: "McDonalds", item: "McDouble", cals: 400, fat: 20 },
+            { chain: "McDonalds", item: "Double Cheeseburger", cals: 450, fat: 24 },
+            { chain: "McDonalds", item: "Cheeseburger", cals: 300, fat: 13 },
+            { chain: "McDonalds", item: "Hamburger", cals: 250, fat: 9 },
+            { chain: "McDonalds", item: "McCrispy", cals: 470, fat: 20 },
+            { chain: "McDonalds", item: "Spicy McCrispy", cals: 530, fat: 26 },
+            { chain: "McDonalds", item: "McChicken", cals: 400, fat: 21 },
+            { chain: "McDonalds", item: "Filet-O-Fish", cals: 390, fat: 19 },
+            { chain: "McDonalds", item: "Chicken McNuggets (4pc)", cals: 170, fat: 10 },
+            { chain: "McDonalds", item: "Chicken McNuggets (6pc)", cals: 250, fat: 15 },
+            { chain: "McDonalds", item: "Chicken McNuggets (10pc)", cals: 410, fat: 24 },
+            { chain: "McDonalds", item: "Chicken McNuggets (20pc)", cals: 830, fat: 49 },
+            { chain: "McDonalds", item: "Egg McMuffin", cals: 310, fat: 13 },
+            { chain: "McDonalds", item: "Sausage McMuffin", cals: 400, fat: 26 },
+            { chain: "McDonalds", item: "Sausage Burrito", cals: 310, fat: 17 },
+            { chain: "McDonalds", item: "Hash Browns", cals: 140, fat: 9 },
+            { chain: "McDonalds", item: "Hotcakes", cals: 580, fat: 15 },
+            { chain: "McDonalds", item: "Large Fries", cals: 480, fat: 23 },
+            { chain: "McDonalds", item: "Medium Fries", cals: 320, fat: 15 },
+            { chain: "McDonalds", item: "Small Fries", cals: 230, fat: 11 },
+            { chain: "McDonalds", item: "McFlurry (Oreo)", cals: 510, fat: 17 },
+            { chain: "McDonalds", item: "McFlurry (M&M)", cals: 640, fat: 21 },
+            { chain: "McDonalds", item: "Baked Apple Pie", cals: 230, fat: 11 },
+            { chain: "McDonalds", item: "Chocolate Shake (Medium)", cals: 620, fat: 17 },
+            { chain: "McDonalds", item: "Vanilla Shake (Medium)", cals: 570, fat: 15 },
+
+            // --- TACO BELL ---
+            { chain: "Taco Bell", item: "Crunchy Taco", cals: 170, fat: 9 },
+            { chain: "Taco Bell", item: "Crunchy Taco Supreme", cals: 190, fat: 11 },
+            { chain: "Taco Bell", item: "Soft Taco", cals: 180, fat: 9 },
+            { chain: "Taco Bell", item: "Soft Taco Supreme", cals: 210, fat: 10 },
+            { chain: "Taco Bell", item: "Spicy Potato Soft Taco", cals: 240, fat: 12 },
+            { chain: "Taco Bell", item: "Nacho Cheese Doritos Locos Taco", cals: 170, fat: 9 },
+            { chain: "Taco Bell", item: "Nacho Cheese Doritos Locos Taco Supreme", cals: 190, fat: 11 },
+            { chain: "Taco Bell", item: "Bean Burrito", cals: 350, fat: 9 },
+            { chain: "Taco Bell", item: "Beefy 5-Layer Burrito", cals: 490, fat: 18 },
+            { chain: "Taco Bell", item: "Burrito Supreme", cals: 390, fat: 13 },
+            { chain: "Taco Bell", item: "Cheesy Bean & Rice Burrito", cals: 420, fat: 16 },
+            { chain: "Taco Bell", item: "Chipotle Ranch Grilled Chicken Burrito", cals: 510, fat: 29 },
+            { chain: "Taco Bell", item: "Crunchwrap Supreme", cals: 530, fat: 21 },
+            { chain: "Taco Bell", item: "Black Bean Crunchwrap Supreme", cals: 510, fat: 18 },
+            { chain: "Taco Bell", item: "Cheesy Gordita Crunch", cals: 500, fat: 28 },
+            { chain: "Taco Bell", item: "Chalupa Supreme (Beef)", cals: 360, fat: 21 },
+            { chain: "Taco Bell", item: "Chalupa Supreme (Chicken)", cals: 340, fat: 19 },
+            { chain: "Taco Bell", item: "Mexican Pizza", cals: 540, fat: 29 },
+            { chain: "Taco Bell", item: "Chicken Quesadilla", cals: 510, fat: 26 },
+            { chain: "Taco Bell", item: "Steak Quesadilla", cals: 520, fat: 26 },
+            { chain: "Taco Bell", item: "Cheese Quesadilla", cals: 470, fat: 26 },
+            { chain: "Taco Bell", item: "Nachos BellGrande", cals: 730, fat: 38 },
+            { chain: "Taco Bell", item: "Chips & Nacho Cheese", cals: 220, fat: 13 },
+            { chain: "Taco Bell", item: "Cheesy Fiesta Potatoes", cals: 230, fat: 12 },
+            { chain: "Taco Bell", item: "Cinnabon Delights (2pk)", cals: 160, fat: 9 },
+            { chain: "Taco Bell", item: "Cinnabon Delights (12pk)", cals: 930, fat: 53 },
+            { chain: "Taco Bell", item: "Cinnamon Twists", cals: 170, fat: 6 },
+            { chain: "Taco Bell", item: "Breakfast Crunchwrap (Bacon)", cals: 670, fat: 40 },
+            { chain: "Taco Bell", item: "Breakfast Crunchwrap (Sausage)", cals: 730, fat: 46 },
+            { chain: "Taco Bell", item: "Hash Brown", cals: 160, fat: 12 },
+            { chain: "Taco Bell", item: "Baja Blast (Large)", cals: 420, fat: 0 },
+            { chain: "Taco Bell", item: "Baja Blast Freeze (Regular)", cals: 150, fat: 0 },
+
+            // --- BURGER KING ---
+            { chain: "Burger King", item: "Whopper", cals: 670, fat: 40 },
+            { chain: "Burger King", item: "Whopper w/ Cheese", cals: 760, fat: 47 },
+            { chain: "Burger King", item: "Double Whopper", cals: 920, fat: 58 },
+            { chain: "Burger King", item: "Triple Whopper", cals: 1170, fat: 78 },
+            { chain: "Burger King", item: "Bacon King", cals: 1200, fat: 79 },
+            { chain: "Burger King", item: "Original Chicken Sandwich", cals: 680, fat: 37 },
+            { chain: "Burger King", item: "Big Fish Sandwich", cals: 570, fat: 30 },
+            { chain: "Burger King", item: "Chicken Fries (9pc)", cals: 280, fat: 17 },
+            { chain: "Burger King", item: "Nuggets (8pc)", cals: 340, fat: 23 },
+            { chain: "Burger King", item: "Mozzarella Sticks (4pc)", cals: 330, fat: 18 },
+            { chain: "Burger King", item: "Large Fries", cals: 400, fat: 17 },
+            { chain: "Burger King", item: "Onion Rings (Medium)", cals: 410, fat: 21 },
+            { chain: "Burger King", item: "Hershey's Sundae Pie", cals: 310, fat: 19 },
+            { chain: "Burger King", item: "Fully Loaded Croissan'wich", cals: 620, fat: 42 },
+            { chain: "Burger King", item: "Sausage, Egg & Cheese Croissan'wich", cals: 500, fat: 34 },
+            { chain: "Burger King", item: "Bacon, Egg & Cheese Biscuit", cals: 420, fat: 26 },
+            { chain: "Burger King", item: "Hash Browns (Medium)", cals: 540, fat: 36 },
+
+            // --- WENDY'S ---
+            { chain: "Wendy's", item: "Dave's Single", cals: 590, fat: 37 },
+            { chain: "Wendy's", item: "Dave's Double", cals: 860, fat: 57 },
+            { chain: "Wendy's", item: "Dave's Triple", cals: 1160, fat: 78 },
+            { chain: "Wendy's", item: "Baconator", cals: 960, fat: 66 },
+            { chain: "Wendy's", item: "Son of Baconator", cals: 630, fat: 39 },
+            { chain: "Wendy's", item: "Big Bacon Classic", cals: 650, fat: 42 },
+            { chain: "Wendy's", item: "Spicy Chicken Sandwich", cals: 510, fat: 20 },
+            { chain: "Wendy's", item: "Classic Chicken Sandwich", cals: 490, fat: 21 },
+            { chain: "Wendy's", item: "Asiago Ranch Chicken Club", cals: 600, fat: 28 },
+            { chain: "Wendy's", item: "10pc Spicy Nuggets", cals: 470, fat: 31 },
+            { chain: "Wendy's", item: "10pc Crispy Nuggets", cals: 450, fat: 29 },
+            { chain: "Wendy's", item: "French Fries (Medium)", cals: 350, fat: 16 },
+            { chain: "Wendy's", item: "French Fries (Large)", cals: 470, fat: 22 },
+            { chain: "Wendy's", item: "Chili (Large)", cals: 340, fat: 15 },
+            { chain: "Wendy's", item: "Baked Potato (Sour Cream & Chive)", cals: 310, fat: 2.5 },
+            { chain: "Wendy's", item: "Baked Potato (Bacon & Cheese)", cals: 440, fat: 13 },
+            { chain: "Wendy's", item: "Chocolate Frosty (Medium)", cals: 410, fat: 11 },
+            { chain: "Wendy's", item: "Vanilla Frosty (Medium)", cals: 410, fat: 10 },
+
+            // --- KFC ---
+            { chain: "KFC", item: "Original Recipe Breast", cals: 390, fat: 21 },
+            { chain: "KFC", item: "Original Recipe Drumstick", cals: 130, fat: 8 },
+            { chain: "KFC", item: "Original Recipe Thigh", cals: 280, fat: 19 },
+            { chain: "KFC", item: "Original Recipe Wing", cals: 130, fat: 8 },
+            { chain: "KFC", item: "Extra Crispy Breast", cals: 530, fat: 35 },
+            { chain: "KFC", item: "Extra Crispy Drumstick", cals: 170, fat: 12 },
+            { chain: "KFC", item: "Extra Crispy Thigh", cals: 370, fat: 25 },
+            { chain: "KFC", item: "Extra Crispy Wing", cals: 170, fat: 13 },
+            { chain: "KFC", item: "Grilled Breast", cals: 210, fat: 7 },
+            { chain: "KFC", item: "Grilled Drumstick", cals: 80, fat: 4 },
+            { chain: "KFC", item: "Grilled Thigh", cals: 150, fat: 9 },
+            { chain: "KFC", item: "Grilled Wing", cals: 70, fat: 3 },
+            { chain: "KFC", item: "Chicken Sandwich", cals: 650, fat: 35 },
+            { chain: "KFC", item: "Chicken Little", cals: 300, fat: 15 },
+            { chain: "KFC", item: "Crispy Tender (1)", cals: 140, fat: 7 },
+            { chain: "KFC", item: "Nuggets (8pc)", cals: 280, fat: 13 },
+            { chain: "KFC", item: "Nuggets (12pc)", cals: 420, fat: 19 },
+            { chain: "KFC", item: "Famous Bowl", cals: 740, fat: 35 },
+            { chain: "KFC", item: "Mac & Cheese (Indiv)", cals: 140, fat: 6 },
+            { chain: "KFC", item: "Mashed Potatoes w/ Gravy", cals: 130, fat: 4 },
+            { chain: "KFC", item: "Biscuit", cals: 180, fat: 8 },
+
+            // --- CHICK-FIL-A ---
+            { chain: "Chick-fil-A", item: "Chicken Sandwich", cals: 420, fat: 18 },
+            { chain: "Chick-fil-A", item: "Spicy Chicken Sandwich", cals: 450, fat: 19 },
+            { chain: "Chick-fil-A", item: "Chicken Deluxe Sandwich", cals: 490, fat: 22 },
+            { chain: "Chick-fil-A", item: "Spicy Deluxe Sandwich", cals: 520, fat: 24 },
+            { chain: "Chick-fil-A", item: "Grilled Chicken Sandwich", cals: 390, fat: 12 },
+            { chain: "Chick-fil-A", item: "Nuggets (8pc)", cals: 250, fat: 11 },
+            { chain: "Chick-fil-A", item: "Nuggets (12pc)", cals: 380, fat: 17 },
+            { chain: "Chick-fil-A", item: "Grilled Nuggets (8pc)", cals: 130, fat: 3 },
+            { chain: "Chick-fil-A", item: "Chick-n-Strips (3pc)", cals: 310, fat: 15 },
+            { chain: "Chick-fil-A", item: "Waffle Potato Fries (Medium)", cals: 420, fat: 24 },
+            { chain: "Chick-fil-A", item: "Waffle Potato Fries (Large)", cals: 600, fat: 35 },
+            { chain: "Chick-fil-A", item: "Mac & Cheese (Medium)", cals: 450, fat: 29 },
+            { chain: "Chick-fil-A", item: "Fruit Cup (Medium)", cals: 60, fat: 0 },
+            { chain: "Chick-fil-A", item: "Chicken Biscuit", cals: 460, fat: 23 },
+            { chain: "Chick-fil-A", item: "Hash Browns", cals: 270, fat: 18 },
+            { chain: "Chick-fil-A", item: "Chick-fil-A Sauce", cals: 140, fat: 13 },
+            { chain: "Chick-fil-A", item: "Polynesian Sauce", cals: 110, fat: 4 },
+            { chain: "Chick-fil-A", item: "Garden Herb Ranch Sauce", cals: 140, fat: 15 },
+            { chain: "Chick-fil-A", item: "Honey Roasted BBQ Sauce", cals: 60, fat: 0 },
+            { chain: "Chick-fil-A", item: "Zesty Buffalo Sauce", cals: 25, fat: 0 },
+            { chain: "Chick-fil-A", item: "Milkshake (Cookies & Cream)", cals: 630, fat: 25 },
+            { chain: "Chick-fil-A", item: "Frosted Lemonade", cals: 330, fat: 6 },
+
+            // --- IN-N-OUT ---
+            { chain: "In-N-Out", item: "Double-Double w/ Onion", cals: 610, fat: 34 },
+            { chain: "In-N-Out", item: "Double-Double Protein Style", cals: 460, fat: 32 },
+            { chain: "In-N-Out", item: "Cheeseburger w/ Onion", cals: 430, fat: 21 },
+            { chain: "In-N-Out", item: "Cheeseburger Protein Style", cals: 280, fat: 19 },
+            { chain: "In-N-Out", item: "Hamburger w/ Onion", cals: 360, fat: 16 },
+            { chain: "In-N-Out", item: "Hamburger Protein Style", cals: 210, fat: 14 },
+            { chain: "In-N-Out", item: "French Fries", cals: 360, fat: 15 },
+            { chain: "In-N-Out", item: "Chocolate Shake", cals: 610, fat: 30 },
+            { chain: "In-N-Out", item: "Strawberry Shake", cals: 610, fat: 30 },
+            { chain: "In-N-Out", item: "Vanilla Shake", cals: 590, fat: 31 },
+
+            // --- SUBWAY ---
+            { chain: "Subway", item: "#1 The Philly (6 inch)", cals: 500, fat: 25 },
+            { chain: "Subway", item: "#2 The Outlaw (6 inch)", cals: 490, fat: 22 },
+            { chain: "Subway", item: "#3 The Monster (6 inch)", cals: 580, fat: 30 },
+            { chain: "Subway", item: "#4 Supreme Meats (6 inch)", cals: 590, fat: 32 },
+            { chain: "Subway", item: "#6 The Boss (6 inch)", cals: 670, fat: 36 },
+            { chain: "Subway", item: "#8 The Great Garlic (6 inch)", cals: 570, fat: 29 },
+            { chain: "Subway", item: "#10 All-American Club (6 inch)", cals: 530, fat: 26 },
+            { chain: "Subway", item: "#15 Titan Turkey (6 inch)", cals: 490, fat: 23 },
+            { chain: "Subway", item: "#30 The Beast (6 inch)", cals: 730, fat: 44 },
+            { chain: "Subway", item: "Black Forest Ham (6 inch)", cals: 280, fat: 4 },
+            { chain: "Subway", item: "Cold Cut Combo (6 inch)", cals: 320, fat: 10 },
+            { chain: "Subway", item: "Meatball Marinara (6 inch)", cals: 460, fat: 20 },
+            { chain: "Subway", item: "Oven Roasted Turkey (6 inch)", cals: 270, fat: 4 },
+            { chain: "Subway", item: "Roast Beef (6 inch)", cals: 310, fat: 3.5 },
+            { chain: "Subway", item: "Rotisserie-Style Chicken (6 inch)", cals: 310, fat: 6 },
+            { chain: "Subway", item: "Steak & Cheese (6 inch)", cals: 360, fat: 10 },
+            { chain: "Subway", item: "Tuna (6 inch)", cals: 470, fat: 25 },
+            { chain: "Subway", item: "Veggie Delite (6 inch)", cals: 210, fat: 3 },
+            { chain: "Subway", item: "Sidekick: Footlong Cookie", cals: 1330, fat: 61 },
+            { chain: "Subway", item: "Sidekick: Footlong Pretzel", cals: 330, fat: 4 },
+            { chain: "Subway", item: "Sidekick: Footlong Churro", cals: 190, fat: 9 },
+            { chain: "Subway", item: "Chocolate Chip Cookie", cals: 210, fat: 10 },
+
+            // --- DUNKIN' ---
+            { chain: "Dunkin", item: "Glazed Donut", cals: 240, fat: 11 },
+            { chain: "Dunkin", item: "Chocolate Frosted Donut", cals: 260, fat: 11 },
+            { chain: "Dunkin", item: "Boston Kreme Donut", cals: 270, fat: 11 },
+            { chain: "Dunkin", item: "Jelly Donut", cals: 250, fat: 10 },
+            { chain: "Dunkin", item: "Old Fashioned Donut", cals: 310, fat: 19 },
+            { chain: "Dunkin", item: "Glazed Chocolate Donut", cals: 370, fat: 23 },
+            { chain: "Dunkin", item: "Strawberry Frosted Donut", cals: 260, fat: 11 },
+            { chain: "Dunkin", item: "Munchkins (Glazed/Choc - 1pc)", cals: 60, fat: 3.5 },
+            { chain: "Dunkin", item: "Bacon Egg & Cheese (Bagel)", cals: 540, fat: 19 },
+            { chain: "Dunkin", item: "Sausage Egg & Cheese (Croissant)", cals: 560, fat: 35 },
+            { chain: "Dunkin", item: "Wake-Up Wrap (Egg & Cheese)", cals: 180, fat: 10 },
+            { chain: "Dunkin", item: "Wake-Up Wrap (Bacon)", cals: 210, fat: 12 },
+            { chain: "Dunkin", item: "Hash Browns", cals: 110, fat: 6 },
+            { chain: "Dunkin", item: "Iced Coffee w/ Cream (Medium)", cals: 90, fat: 9 },
+            { chain: "Dunkin", item: "Iced Dunkalatte (Medium)", cals: 310, fat: 10 },
+            { chain: "Dunkin", item: "Cookie Butter Cold Brew (Medium)", cals: 200, fat: 3.5 },
+            { chain: "Dunkin", item: "Frozen Coffee (Medium)", cals: 410, fat: 4.5 },
+
+            // --- JOLLIBEE ---
+            { chain: "Jollibee", item: "Chickenjoy Drumstick (1pc)", cals: 220, fat: 14 },
+            { chain: "Jollibee", item: "Chickenjoy Thigh (1pc)", cals: 380, fat: 28 },
+            { chain: "Jollibee", item: "Spicy Chickenjoy Drumstick", cals: 240, fat: 14 },
+            { chain: "Jollibee", item: "Spicy Chickenjoy Thigh", cals: 350, fat: 21 },
+            { chain: "Jollibee", item: "Chicken Sandwich Original", cals: 609, fat: 33 },
+            { chain: "Jollibee", item: "Chicken Sandwich Spicy", cals: 559, fat: 27 },
+            { chain: "Jollibee", item: "Aloha Chicken Sandwich", cals: 639, fat: 33 },
+            { chain: "Jollibee", item: "Jolly Spaghetti", cals: 610, fat: 18 },
+            { chain: "Jollibee", item: "Palabok Fiesta", cals: 410, fat: 20 },
+            { chain: "Jollibee", item: "Burger Steak (2pc w/ Rice)", cals: 570, fat: 28 },
+            { chain: "Jollibee", item: "Yum Burger", cals: 360, fat: 21 },
+            { chain: "Jollibee", item: "Peach Mango Pie", cals: 270, fat: 11 },
+            { chain: "Jollibee", item: "Ube Pie", cals: 310, fat: 15 },
+            { chain: "Jollibee", item: "Pineapple Quencher", cals: 180, fat: 0 },
+            { chain: "Jollibee", item: "Coconut Dream Freeze", cals: 240, fat: 6 },
+
+            // --- EL POLLO LOCO ---
+            { chain: "El Pollo Loco", item: "Chicken Leg (1pc)", cals: 110, fat: 7 },
+            { chain: "El Pollo Loco", item: "Chicken Thigh (1pc)", cals: 200, fat: 12 },
+            { chain: "El Pollo Loco", item: "Chicken Breast (1pc)", cals: 200, fat: 8 },
+            { chain: "El Pollo Loco", item: "Chicken Wing (1pc)", cals: 70, fat: 3 },
+            { chain: "El Pollo Loco", item: "Double Chicken Bowl", cals: 930, fat: 33 },
+            { chain: "El Pollo Loco", item: "Original Pollo Bowl", cals: 580, fat: 10 },
+            { chain: "El Pollo Loco", item: "Grande Avocado Chicken Bowl", cals: 790, fat: 26 },
+            { chain: "El Pollo Loco", item: "Chipotle Chicken Quesadilla", cals: 930, fat: 57 },
+            { chain: "El Pollo Loco", item: "Shredded Chicken Nachos", cals: 1090, fat: 65 },
+            { chain: "El Pollo Loco", item: "Guacamole Chicken Burrito", cals: 920, fat: 47 },
+            { chain: "El Pollo Loco", item: "Chipotle Guacamole Chicken Burrito", cals: 1020, fat: 51 },
+            { chain: "El Pollo Loco", item: "Original BRC Burrito", cals: 410, fat: 11 },
+            { chain: "El Pollo Loco", item: "Taco al Carbon", cals: 170, fat: 5 },
+            { chain: "El Pollo Loco", item: "Double Chicken Tostada Salad", cals: 1000, fat: 46 },
+            { chain: "El Pollo Loco", item: "Classic Chicken Tostada Salad", cals: 830, fat: 38 },
+            { chain: "El Pollo Loco", item: "Chips & Guacamole (Small)", cals: 480, fat: 32 },
+            { chain: "El Pollo Loco", item: "Rice (Small)", cals: 100, fat: 1.5 },
+            { chain: "El Pollo Loco", item: "Pinto Beans (Small)", cals: 140, fat: 0.5 },
+            { chain: "El Pollo Loco", item: "Macaroni & Cheese (Small)", cals: 310, fat: 19 },
+            { chain: "El Pollo Loco", item: "Mashed Potatoes w/ Gravy (Small)", cals: 100, fat: 1.5 },
+            { chain: "El Pollo Loco", item: "Corn (Small)", cals: 140, fat: 4.5 },
+            { chain: "El Pollo Loco", item: "Creamy Cilantro Dressing", cals: 310, fat: 33 },
+
+            // --- DEL TACO ---
+            { chain: "Del Taco", item: "The Del Taco (Crunchy)", cals: 300, fat: 20 },
+            { chain: "Del Taco", item: "The Del Taco (Soft)", cals: 290, fat: 10 },
+            { chain: "Del Taco", item: "Snack Taco (Crunchy)", cals: 120, fat: 3 },
+            { chain: "Del Taco", item: "Beer Battered Fish Taco", cals: 230, fat: 9 },
+            { chain: "Del Taco", item: "Del Dorado Chicken Taco", cals: 190, fat: 4.5 },
+            { chain: "Del Taco", item: "Bean & Cheese Burrito (Green)", cals: 500, fat: 10 },
+            { chain: "Del Taco", item: "Bean & Cheese Burrito (Red)", cals: 520, fat: 10 },
+            { chain: "Del Taco", item: "Epic Grilled Chicken Fresh Guac Burrito", cals: 740, fat: 20 },
+            { chain: "Del Taco", item: "Epic Carne Asada Fresh Guac Burrito", cals: 770, fat: 26 },
+            { chain: "Del Taco", item: "Epic Combo Beef & Bean Burrito", cals: 880, fat: 41 },
+            { chain: "Del Taco", item: "Macho Beef Burrito", cals: 860, fat: 11 },
+            { chain: "Del Taco", item: "Chicken Cheddar Quesadilla", cals: 540, fat: 30 },
+            { chain: "Del Taco", item: "Cheddar Quesadilla", cals: 480, fat: 27 },
+            { chain: "Del Taco", item: "Del Cheeseburger", cals: 470, fat: 28 },
+            { chain: "Del Taco", item: "Double Del Cheeseburger", cals: 660, fat: 47 },
+            { chain: "Del Taco", item: "Crinkle Cut Fries (Regular)", cals: 320, fat: 19 },
+            { chain: "Del Taco", item: "Crinkle Cut Fries (Large)", cals: 410, fat: 25 },
+            { chain: "Del Taco", item: "Carne Asada Steak Fries", cals: 760, fat: 56 },
+            { chain: "Del Taco", item: "Queso Loaded Fries", cals: 660, fat: 44 },
+            { chain: "Del Taco", item: "3 Layer Queso Nachos", cals: 350, fat: 10 },
+            { chain: "Del Taco", item: "Breakfast Burrito (Bacon/Egg/Cheese)", cals: 520, fat: 26 },
+            { chain: "Del Taco", item: "Hashbrown Sticks (5pc)", cals: 230, fat: 17 },
+            { chain: "Del Taco", item: "Mini Cinnamon Churros (2pc)", cals: 200, fat: 10 },
+            { chain: "Del Taco", item: "Caramel Cheesecake Bites (2pc)", cals: 410, fat: 23 },
+            { chain: "Del Taco", item: "Orange Cream Shake (Regular)", cals: 538, fat: 9 },
+            { chain: "Del Taco", item: "Chocolate Shake (Regular)", cals: 550, fat: 9 },
+            { chain: "Del Taco", item: "Strawberry Shake (Regular)", cals: 520, fat: 9 },
+            { chain: "Del Taco", item: "Vanilla Shake (Regular)", cals: 480, fat: 9 },
+
+            // --- THE HABIT BURGER GRILL ---
+            { chain: "The Habit", item: "Charburger", cals: 500, fat: 31 },
+            { chain: "The Habit", item: "Double Char", cals: 730, fat: 49 },
+            { chain: "The Habit", item: "Santa Barbara Char", cals: 1210, fat: 93 },
+            { chain: "The Habit", item: "Teriyaki Char", cals: 570, fat: 31 },
+            { chain: "The Habit", item: "BBQ Bacon Char", cals: 630, fat: 37 },
+            { chain: "The Habit", item: "Portabella Char", cals: 760, fat: 56 },
+            { chain: "The Habit", item: "Chicken Sandwich", cals: 910, fat: 57 },
+            { chain: "The Habit", item: "Veggie Burger", cals: 550, fat: 30 },
+            { chain: "The Habit", item: "French Fries", cals: 440, fat: 27 },
+            { chain: "The Habit", item: "Onion Rings", cals: 500, fat: 24 },
+            { chain: "The Habit", item: "Tempura Green Beans", cals: 250, fat: 11 },
+            { chain: "The Habit", item: "Sweet Potato Fries", cals: 374, fat: 11 },
+            { chain: "The Habit", item: "Vanilla Shake", cals: 640, fat: 28 },
+            { chain: "The Habit", item: "Chocolate Shake", cals: 690, fat: 27 },
+            { chain: "The Habit", item: "Cookies & Cream Shake", cals: 800, fat: 34 },
+
+            // --- FATBURGER ---
+            { chain: "Fatburger", item: "Small 'Baby Fat' Burger", cals: 400, fat: 21 },
+            { chain: "Fatburger", item: "Medium 'Original' Fatburger", cals: 590, fat: 31 },
+            { chain: "Fatburger", item: "Large 'Kingburger'", cals: 850, fat: 41 },
+            { chain: "Fatburger", item: "XXL 'Double King'", cals: 1268, fat: 69 },
+            { chain: "Fatburger", item: "XXXL 'Triple King'", cals: 1686, fat: 97 },
+            { chain: "Fatburger", item: "Thousand Island Burger", cals: 771, fat: 47 },
+            { chain: "Fatburger", item: "Western BBQ Burger", cals: 780, fat: 38 },
+            { chain: "Fatburger", item: "Skinnyburger (Patty Melt style)", cals: 697, fat: 47 },
+            { chain: "Fatburger", item: "Turkeyburger", cals: 480, fat: 21 },
+            { chain: "Fatburger", item: "Impossible Burger", cals: 526, fat: 13 },
+            { chain: "Fatburger", item: "Skinny Fries", cals: 390, fat: 15 },
+            { chain: "Fatburger", item: "Fat Fries (Steak)", cals: 380, fat: 18 },
+            { chain: "Fatburger", item: "Sweet Potato Fries", cals: 480, fat: 24 },
+            { chain: "Fatburger", item: "Onion Rings", cals: 540, fat: 29 },
+            { chain: "Fatburger", item: "Chili Cup", cals: 200, fat: 11 },
+            { chain: "Fatburger", item: "Vanilla Shake", cals: 890, fat: 44 },
+            { chain: "Fatburger", item: "Chocolate Shake", cals: 910, fat: 45 },
+            { chain: "Fatburger", item: "Cookies & Cream Shake", cals: 1180, fat: 59 },
+            { chain: "Fatburger", item: "Maui-Banana Shake", cals: 940, fat: 44 },
+
+            // --- DAVE'S HOT CHICKEN ---
+            { chain: "Dave's Hot Chicken", item: "Combo #1 (2 Tenders)", cals: 1230, fat: 58 },
+            { chain: "Dave's Hot Chicken", item: "Combo #2 (2 Sliders)", cals: 1500, fat: 75 },
+            { chain: "Dave's Hot Chicken", item: "Combo #3 (1 Tender, 1 Slider)", cals: 1370, fat: 67 },
+            { chain: "Dave's Hot Chicken", item: "Single Slider (No/Light Spice)", cals: 620, fat: 37 },
+            { chain: "Dave's Hot Chicken", item: "Single Slider (Reaper Spice)", cals: 680, fat: 43 },
+            { chain: "Dave's Hot Chicken", item: "Single Tender (No/Light Spice)", cals: 490, fat: 29 },
+            { chain: "Dave's Hot Chicken", item: "Single Tender (Reaper Spice)", cals: 550, fat: 35 },
+            { chain: "Dave's Hot Chicken", item: "Mac & Cheese", cals: 290, fat: 16 },
+            { chain: "Dave's Hot Chicken", item: "Kale Slaw", cals: 270, fat: 26 },
+            { chain: "Dave's Hot Chicken", item: "French Fries", cals: 440, fat: 20 },
+            { chain: "Dave's Hot Chicken", item: "Cheese Fries", cals: 460, fat: 22 },
+            { chain: "Dave's Hot Chicken", item: "Dave's Sauce (Cup)", cals: 180, fat: 18 },
+            { chain: "Dave's Hot Chicken", item: "Cheese Slice", cals: 70, fat: 6 },
+            { chain: "Dave's Hot Chicken", item: "Milkshake (Regular)", cals: 610, fat: 47 },
+            { chain: "Dave's Hot Chicken", item: "Milkshake (Large)", cals: 760, fat: 58 },
+
+            // --- JACK IN THE BOX --- 2025 Update
+            { chain: "Jack in the Box", item: "Two Tacos (Regular)", cals: 340, fat: 19 },
+            { chain: "Jack in the Box", item: "Sourdough Jack", cals: 700, fat: 45 },
+            { chain: "Jack in the Box", item: "Jumbo Jack w/ Cheese", cals: 570, fat: 30 },
+            { chain: "Jack in the Box", item: "Ultimate Cheeseburger", cals: 840, fat: 59 },
+            { chain: "Jack in the Box", item: "Bacon Ultimate Cheeseburger", cals: 930, fat: 65 },
+            { chain: "Jack in the Box", item: "The Cluck Chicken Sandwich", cals: 710, fat: 37 },
+            { chain: "Jack in the Box", item: "Homestyle Ranch Chicken Club", cals: 630, fat: 30 },
+            { chain: "Jack in the Box", item: "Seasoned Curly Fries (Medium)", cals: 430, fat: 25 },
+            { chain: "Jack in the Box", item: "Seasoned Curly Fries (Large)", cals: 580, fat: 33 },
+            { chain: "Jack in the Box", item: "Stuffed Jalapenos (3pc)", cals: 220, fat: 12 },
+            { chain: "Jack in the Box", item: "Stuffed Jalapenos (7pc)", cals: 510, fat: 28 },
+            { chain: "Jack in the Box", item: "Jumbo Egg Rolls (3pc)", cals: 570, fat: 33 },
+            { chain: "Jack in the Box", item: "Mini Churros (5pc)", cals: 350, fat: 18 },
+            { chain: "Jack in the Box", item: "Oreo Cookie Shake (Regular 16oz)", cals: 690, fat: 28 },
+            { chain: "Jack in the Box", item: "Chocolate Shake (Regular 16oz)", cals: 780, fat: 38 },
+
+            // --- CARL'S JR. --- 2025 Update
+            { chain: "Carl's Jr.", item: "Famous Star w/ Cheese", cals: 670, fat: 39 },
+            { chain: "Carl's Jr.", item: "Western Bacon Cheeseburger", cals: 780, fat: 36 },
+            { chain: "Carl's Jr.", item: "Super Star w/ Cheese", cals: 930, fat: 57 },
+            { chain: "Carl's Jr.", item: "The Big Carl", cals: 930, fat: 59 },
+            { chain: "Carl's Jr.", item: "Guacamole Bacon Angus Burger", cals: 970, fat: 64 },
+            { chain: "Carl's Jr.", item: "Spicy Chicken Sandwich", cals: 400, fat: 22 },
+            { chain: "Carl's Jr.", item: "Hand-Breaded Chicken Sandwich", cals: 540, fat: 32 },
+            { chain: "Carl's Jr.", item: "Hand-Breaded Chicken Tenders (3pc)", cals: 260, fat: 13 },
+            { chain: "Carl's Jr.", item: "Hand-Breaded Chicken Tenders (5pc)", cals: 440, fat: 21 },
+            { chain: "Carl's Jr.", item: "CrissCut Fries (Medium)", cals: 380, fat: 25 },
+            { chain: "Carl's Jr.", item: "Fried Zucchini (Medium)", cals: 310, fat: 19 },
+            { chain: "Carl's Jr.", item: "Jalapeno Poppers (6pc)", cals: 370, fat: 22 },
+            { chain: "Carl's Jr.", item: "Onion Rings", cals: 560, fat: 30 },
+
+            // --- POPEYES (2025 Update) ---
+            { chain: "Popeyes", item: "Classic Chicken Sandwich", cals: 700, fat: 42 },
+            { chain: "Popeyes", item: "Spicy Chicken Sandwich", cals: 700, fat: 42 },
+            { chain: "Popeyes", item: "Signature Chicken (Leg - Mild)", cals: 160, fat: 9 },
+            { chain: "Popeyes", item: "Signature Chicken (Thigh - Mild)", cals: 280, fat: 21 },
+            { chain: "Popeyes", item: "Signature Chicken (Breast - Mild)", cals: 380, fat: 20 },
+            { chain: "Popeyes", item: "Signature Chicken (Wing - Mild)", cals: 210, fat: 14 },
+            { chain: "Popeyes", item: "Handcrafted Tenders (3pc)", cals: 390, fat: 19 },
+            { chain: "Popeyes", item: "Handcrafted Tenders (5pc)", cals: 650, fat: 32 },
+            { chain: "Popeyes", item: "Blackened Tenders (3pc)", cals: 175, fat: 2 },
+            { chain: "Popeyes", item: "Blackened Tenders (5pc)", cals: 290, fat: 3 },
+            { chain: "Popeyes", item: "Cajun Fries (Regular)", cals: 270, fat: 14 },
+            { chain: "Popeyes", item: "Red Beans & Rice (Regular)", cals: 250, fat: 15 },
+            { chain: "Popeyes", item: "Mashed Potatoes w/ Gravy (Regular)", cals: 110, fat: 4 },
+            { chain: "Popeyes", item: "Homestyle Mac & Cheese (Regular)", cals: 280, fat: 21 },
+            { chain: "Popeyes", item: "Buttermilk Biscuit", cals: 210, fat: 13 },
+            { chain: "Popeyes", item: "Ghost Pepper Wings (6pc)", cals: 670, fat: 38 },
+            { chain: "Popeyes", item: "Sweet & Spicy Wings (6pc)", cals: 880, fat: 44 },
+
+            // --- ORIGINAL TOMMY'S (Updated 2022 Data) ---
+            { chain: "Tommy's", item: "Chili Cheeseburger (Single)", cals: 530, fat: 28 },
+            { chain: "Tommy's", item: "Chili Cheeseburger (Double)", cals: 710, fat: 39 },
+            { chain: "Tommy's", item: "Chili Cheeseburger (Triple)", cals: 950, fat: 56 },
+            { chain: "Tommy's", item: "1/4 lb Chili Cheeseburger (Single)", cals: 675, fat: 39 },
+            { chain: "Tommy's", item: "1/4 lb Chili Cheeseburger (Double)", cals: 999, fat: 57 },
+            { chain: "Tommy's", item: "Chili Burger (Single)", cals: 460, fat: 22 },
+            { chain: "Tommy's", item: "Chili Cheese Dog", cals: 570, fat: 33 },
+            { chain: "Tommy's", item: "Chili Hot Dog", cals: 510, fat: 27 },
+            { chain: "Tommy's", item: "Chili Tamale", cals: 450, fat: 30 },
+            { chain: "Tommy's", item: "French Fries", cals: 680, fat: 33 },
+            { chain: "Tommy's", item: "Chili Cheese Fries", cals: 920, fat: 53 },
+            { chain: "Tommy's", item: "Chili Boat", cals: 440, fat: 34 },
+            { chain: "Tommy's", item: "Breakfast Burrito", cals: 980, fat: 67 },
+            { chain: "Tommy's", item: "Root Beer Float", cals: 370, fat: 8 },
+
+            // --- WIENERSCHNITZEL (2025 Update) ---
+            { chain: "Wienerschnitzel", item: "Chili Cheese Dog", cals: 350, fat: 20 },
+            { chain: "Wienerschnitzel", item: "Chili Dog", cals: 300, fat: 15 },
+            { chain: "Wienerschnitzel", item: "Mustard Dog", cals: 280, fat: 14 },
+            { chain: "Wienerschnitzel", item: "Chicago Dog", cals: 330, fat: 13 },
+            { chain: "Wienerschnitzel", item: "Junkyard Dog", cals: 430, fat: 24 },
+            { chain: "Wienerschnitzel", item: "Corn Dog", cals: 230, fat: 13 },
+            { chain: "Wienerschnitzel", item: "Chili Cheese Fries (Large)", cals: 970, fat: 51 },
+            { chain: "Wienerschnitzel", item: "Chili Cheese Fries (Regular)", cals: 530, fat: 29 },
+            { chain: "Wienerschnitzel", item: "French Fries (Medium)", cals: 440, fat: 23 },
+            { chain: "Wienerschnitzel", item: "Jalapeno Poppers (6pc)", cals: 300, fat: 16 },
+            { chain: "Wienerschnitzel", item: "Mini Corn Dogs (6pc)", cals: 360, fat: 19 },
+            { chain: "Wienerschnitzel", item: "Polish Sausage Sandwich", cals: 500, fat: 34 },
+            { chain: "Wienerschnitzel", item: "Tastee-Freez Chocolate Shake", cals: 880, fat: 30 },
+            { chain: "Wienerschnitzel", item: "Tastee-Freez Oreo Shake", cals: 880, fat: 31 },
+
+            // --- ARBY'S (2025 Update) ---
+            { chain: "Arby's", item: "Classic Roast Beef", cals: 360, fat: 14 },
+            { chain: "Arby's", item: "Double Roast Beef", cals: 510, fat: 24 },
+            { chain: "Arby's", item: "Half Pound Roast Beef", cals: 610, fat: 30 },
+            { chain: "Arby's", item: "Classic Beef 'n Cheddar", cals: 450, fat: 20 },
+            { chain: "Arby's", item: "Double Beef 'n Cheddar", cals: 630, fat: 32 },
+            { chain: "Arby's", item: "Half Pound Beef 'n Cheddar", cals: 740, fat: 39 },
+            { chain: "Arby's", item: "Classic French Dip & Swiss", cals: 530, fat: 21 },
+            { chain: "Arby's", item: "Greek Gyro", cals: 700, fat: 44 },
+            { chain: "Arby's", item: "Roast Beef Gyro", cals: 540, fat: 29 },
+            { chain: "Arby's", item: "Steak Nuggets (9pc)", cals: 600, fat: 49 },
+            { chain: "Arby's", item: "Steak Nugget Bowl", cals: 880, fat: 60 },
+            { chain: "Arby's", item: "Loaded Italian", cals: 600, fat: 46 },
+            { chain: "Arby's", item: "Chicken Bacon Swiss", cals: 650, fat: 30 },
+            { chain: "Arby's", item: "Buffalo Chicken Sandwich", cals: 530, fat: 22 },
+            { chain: "Arby's", item: "Chicken Tenders (5pc)", cals: 610, fat: 30 },
+            { chain: "Arby's", item: "Curly Fries (Medium)", cals: 410, fat: 22 },
+            { chain: "Arby's", item: "Curly Fries (Large)", cals: 550, fat: 29 },
+            { chain: "Arby's", item: "Mozzarella Sticks (4pc)", cals: 440, fat: 23 },
+            { chain: "Arby's", item: "Jalapeno Bites (5pc)", cals: 290, fat: 17 },
+            { chain: "Arby's", item: "White Cheddar Mac 'n Cheese", cals: 470, fat: 27 },
+            { chain: "Arby's", item: "Jamocha Shake (Regular)", cals: 530, fat: 16 },
+            { chain: "Arby's", item: "Chocolate Shake (Regular)", cals: 520, fat: 17 },
+            { chain: "Arby's", item: "Vanilla Shake (Regular)", cals: 480, fat: 17 },
+            { chain: "Arby's", item: "Apple Turnover", cals: 430, fat: 18 },
+
+            // --- DOMINO'S PIZZA (2025 Update) ---
+            { chain: "Domino's", item: "Cheese Pizza (Large Slice)", cals: 290, fat: 11 },
+            { chain: "Domino's", item: "Pepperoni Pizza (Large Slice)", cals: 320, fat: 13 },
+            { chain: "Domino's", item: "Sausage Pizza (Large Slice)", cals: 320, fat: 13 },
+            { chain: "Domino's", item: "Veggie Pizza (Large Slice)", cals: 280, fat: 10 },
+            { chain: "Domino's", item: "ExtravaganZZa Pizza (Large Slice)", cals: 380, fat: 17 },
+            { chain: "Domino's", item: "MeatZZa Pizza (Large Slice)", cals: 370, fat: 17 },
+            { chain: "Domino's", item: "Philly Cheese Steak Pizza (Large Slice)", cals: 340, fat: 15 },
+            { chain: "Domino's", item: "Honolulu Hawaiian Pizza (Large Slice)", cals: 330, fat: 13 },
+            { chain: "Domino's", item: "Cali Chicken Bacon Ranch Pizza (Large Slice)", cals: 410, fat: 21 },
+            { chain: "Domino's", item: "Buffalo Chicken Pizza (Large Slice)", cals: 350, fat: 15 },
+            { chain: "Domino's", item: "Spinach & Feta Pizza (Large Slice)", cals: 320, fat: 14 },
+            { chain: "Domino's", item: "Boneless Chicken (3pc)", cals: 170, fat: 7 },
+            { chain: "Domino's", item: "Specialty Chicken - Classic Hot Buffalo (4pc)", cals: 190, fat: 11 },
+            { chain: "Domino's", item: "Specialty Chicken - Crispy Bacon & Tomato (4pc)", cals: 260, fat: 17 },
+            { chain: "Domino's", item: "Specialty Chicken - Sweet BBQ Bacon (4pc)", cals: 210, fat: 10 },
+            { chain: "Domino's", item: "Hot Buffalo Wings (4pc)", cals: 260, fat: 20 },
+            { chain: "Domino's", item: "Honey BBQ Wings (4pc)", cals: 310, fat: 20 },
+            { chain: "Domino's", item: "Garlic Parmesan Wings (4pc)", cals: 390, fat: 34 },
+            { chain: "Domino's", item: "Stuffed Cheesy Bread (1pc)", cals: 150, fat: 7 },
+            { chain: "Domino's", item: "Stuffed Cheesy Bread - Spinach & Feta (1pc)", cals: 160, fat: 7 },
+            { chain: "Domino's", item: "Parmesan Bread Bites (4pc)", cals: 210, fat: 9 },
+            { chain: "Domino's", item: "Garlic Bread Twists (2pc)", cals: 250, fat: 11 },
+            { chain: "Domino's", item: "Cheddar Bacon Loaded Tots (1/4 order)", cals: 240, fat: 16 },
+            { chain: "Domino's", item: "Philly Cheese Steak Loaded Tots (1/4 order)", cals: 200, fat: 12 },
+            { chain: "Domino's", item: "Chicken Alfredo Pasta (Dish)", cals: 590, fat: 28 },
+            { chain: "Domino's", item: "Italian Sausage Marinara Pasta (Dish)", cals: 680, fat: 35 },
+            { chain: "Domino's", item: "5-Cheese Mac & Cheese (Dish)", cals: 830, fat: 50 },
+            { chain: "Domino's", item: "Chicken Caesar Salad", cals: 220, fat: 8 },
+            { chain: "Domino's", item: "Chocolate Lava Crunch Cake (1 cake)", cals: 350, fat: 17 },
+            { chain: "Domino's", item: "Marbled Cookie Brownie (1 brownie)", cals: 200, fat: 10 },
+            { chain: "Domino's", item: "Cinnamon Bread Twists (2pc)", cals: 250, fat: 11 },
+        ];
+
+        let state = {
+            items: [],
+            players: [],
+            isMultiplayer: false,
+            showFat: true,
+            activePlayerId: null
+        };
+
+        const uniqueChains = [...new Set(menuDB.map(i => i.chain))].sort();
+
+        window.onload = () => {
+            setupManualAutocomplete();
+            setupDBChainAutocomplete(); // New function for DB Filter
+            renderDBList(); 
+            render(); 
+        };
+
+        function toggleFat() {
+            state.showFat = document.getElementById('toggle-fat').checked;
+            render();
+        }
+
+        function toggleMultiplayer() {
+            state.isMultiplayer = document.getElementById('toggle-multiplayer').checked;
+            const hudArea = document.getElementById('hud-multiplayer-area');
+            const dashArea = document.getElementById('global-player-dashboard');
+            const manageArea = document.getElementById('player-manager');
+            
+            if (state.isMultiplayer) {
+                hudArea.classList.remove('hidden');
+                dashArea.classList.remove('hidden');
+                manageArea.classList.remove('hidden');
+                
+                if (state.players.length === 0) addNewPlayer("Player 1");
+                if (!state.activePlayerId && state.players.length > 0) {
+                    setActivePlayer(state.players[0].id);
+                }
+                
+                renderPlayerButtons();
+                renderManageList();
+            } else {
+                hudArea.classList.add('hidden');
+                dashArea.classList.add('hidden');
+                manageArea.classList.add('hidden');
+            }
+            render();
+        }
+
+        function setActivePlayer(id) {
+            state.activePlayerId = id;
+            renderPlayerButtons();
+        }
+
+        function renderPlayerButtons() {
+            const grid = document.getElementById('player-buttons-grid');
+            grid.innerHTML = state.players.map(p => {
+                const isActive = p.id === state.activePlayerId;
+                return `<div class="player-select-btn ${isActive ? 'active' : ''}" 
+                             onclick="setActivePlayer(${p.id})">
+                             ${p.name}
+                        </div>`;
+            }).join('');
+        }
+
+        function renderManageList() {
+            const list = document.getElementById('manage-players-list');
+            list.innerHTML = state.players.map(p => `
+                <div class="manage-player-row">
+                    <input type="text" class="manage-player-input" 
+                           value="${p.name}" 
+                           oninput="updatePlayerName(${p.id}, this.value)">
+                    <button class="btn btn-danger btn-small" style="width:auto;" onclick="removePlayer(${p.id})">X</button>
+                </div>
+            `).join('');
+        }
+
+        function addNewPlayer(nameOverride) {
+            const input = document.getElementById('new-player-input');
+            const name = nameOverride || input.value.trim();
+            if (!name && !nameOverride) return;
+            
+            const finalName = name || "New Player";
+            const newId = Date.now();
+            state.players.push({ id: newId, name: finalName });
+            setActivePlayer(newId);
+
+            if (input) input.value = '';
+            
+            render();
+            renderPlayerButtons();
+            renderManageList();
+        }
+
+        function removePlayer(id) {
+            if (!confirm("Delete this player?")) return;
+            state.players = state.players.filter(p => p.id != id);
+            state.items.forEach(i => { if (i.playerId == id) i.playerId = null; });
+            
+            if (state.activePlayerId == id) {
+                state.activePlayerId = state.players.length > 0 ? state.players[0].id : null;
+            }
+
+            render();
+            renderPlayerButtons();
+            renderManageList();
+        }
+
+        function updatePlayerName(id, newName) {
+            const player = state.players.find(p => p.id == id);
+            if (player) {
+                player.name = newName;
+                render(); 
+                renderPlayerButtons();
+            }
+        }
+
+        function addManualItem() {
+            const chain = document.getElementById('input-chain').value.trim() || "Custom";
+            const item = document.getElementById('input-item').value.trim();
+            const cals = parseFloat(document.getElementById('input-cals').value) || 0;
+            const fat = parseFloat(document.getElementById('input-fat').value) || 0;
+            
+            const playerId = state.isMultiplayer ? state.activePlayerId : null;
+            if (state.isMultiplayer && !playerId) return alert("Please select a player at the top first!");
+
+            if (!item) return alert("Item name required");
+
+            state.items.push({
+                id: Date.now(),
+                chain, item, cals, fat, playerId
+            });
+
+            document.getElementById('input-item').value = '';
+            document.getElementById('input-cals').value = '';
+            document.getElementById('input-fat').value = '';
+            
+            // NOTE: Chain input is NOT cleared
+            document.getElementById('input-item').focus();
+            
+            render();
+        }
+
+        /* --- NEW DB LOGIC --- */
+        function renderDBList() {
+            const query = document.getElementById('db-search').value.toLowerCase();
+            const filterChain = document.getElementById('db-chain-filter').value.toLowerCase(); // Get text input
+            const container = document.getElementById('db-list-container');
+            
+            // Filter
+            const matches = menuDB.filter(f => {
+                const matchesText = f.item.toLowerCase().includes(query) || f.chain.toLowerCase().includes(query);
+                // Smart matching for the chain filter
+                const matchesChain = filterChain === "" || f.chain.toLowerCase().includes(filterChain);
+                return matchesText && matchesChain;
+            });
+
+            if (matches.length === 0) {
+                container.innerHTML = `<div style="padding:15px; color:#555; text-align:center; font-size:12px;">No matches found</div>`;
+                return;
+            }
+
+            container.innerHTML = matches.map((f, index) => {
+                return `
+                <div class="db-list-item" onclick="addFromDB('${f.item.replace(/'/g, "\\'")}')">
+                    <div>
+                        <div class="db-item-name">${f.item}</div>
+                        <div class="db-item-sub">${f.chain}</div>
+                    </div>
+                    <div class="db-item-stats">${f.cals} cal</div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function addFromDB(itemName) {
+            const food = menuDB.find(f => f.item === itemName); 
+            if (!food) return;
+
+            const playerId = state.isMultiplayer ? state.activePlayerId : null;
+            if (state.isMultiplayer && !playerId) return alert("Please select a player at the top first!");
+
+            state.items.push({
+                id: Date.now(),
+                chain: food.chain,
+                item: food.item,
+                cals: food.cals,
+                fat: food.fat,
+                playerId
+            });
+            render();
+        }
+
+        function deleteItem(id) {
+            state.items = state.items.filter(i => i.id !== id);
+            render();
+        }
+
+        function clearAll() {
+            if(confirm("Clear all data?")) {
+                state.items = [];
+                render();
+            }
+        }
+
+        function render() {
+            // Check Fat Toggle State
+            const fatCard = document.getElementById('hud-fat-card');
+            if (state.showFat) {
+                fatCard.classList.remove('hidden');
+            } else {
+                fatCard.classList.add('hidden');
+            }
+
+            // Calculate Totals
+            let totalCals = 0;
+            let totalFat = 0;
+            
+            // --- UPDATED LOGIC FOR RESTAURANT LIST ---
+            // List unique restaurants in order of first appearance
+            const seenChains = new Set();
+            const orderedChains = [];
+
+            state.items.forEach(i => {
+                totalCals += i.cals;
+                totalFat += i.fat;
+                
+                if (i.chain !== "General Drinks" && i.chain !== "Custom") {
+                    if (!seenChains.has(i.chain)) {
+                        seenChains.add(i.chain);
+                        orderedChains.push(i.chain);
+                    }
+                }
+            });
+
+            document.getElementById('hud-cals').innerText = totalCals.toLocaleString();
+            document.getElementById('hud-fat').innerHTML = `${totalFat.toFixed(1)} <span class="hud-unit">g</span>`;
+
+            // Update HUD Restaurants (TIMELINE ORDER)
+            const resContainer = document.getElementById('hud-restaurants');
+            
+            if (orderedChains.length === 0) {
+                resContainer.innerHTML = '<span style="font-size: 12px; color: rgba(255,255,255,0.3); font-style: italic;">No items yet</span>';
+            } else {
+                resContainer.innerHTML = '<ol class="res-list">' + 
+                    orderedChains.map(chain => 
+                        `<li>
+                            <div class="res-list-item-content">
+                                <span>${chain}</span>
+                            </div>
+                        </li>`
+                    ).join('') + 
+                '</ol>';
+            }
+
+            // Render Multiplayer HUD
+            if (state.isMultiplayer) {
+                const pContainer = document.getElementById('hud-multiplayer-area');
+                pContainer.innerHTML = state.players.map(p => {
+                    let pCals = 0;
+                    let pFat = 0;
+                    state.items.filter(i => i.playerId == p.id).forEach(i => { pCals += i.cals; pFat += i.fat; });
+                    
+                    let fatHtml = state.showFat 
+                        ? `<span style="margin-left:8px; opacity:0.8;">| ${pFat.toFixed(0)}g fat</span>` 
+                        : '';
+
+                    return `
+                    <div class="player-row">
+                        <span class="p-name">${p.name}</span>
+                        <span class="p-stats">
+                            ${pCals} <span class="p-stat-detail">cal</span>
+                            ${fatHtml}
+                        </span>
+                    </div>`;
+                }).join('');
+            }
+
+            // Render Admin History
+            const histList = document.getElementById('history-list');
+            histList.innerHTML = state.items.slice().reverse().map(i => {
+                let playerBadge = '';
+                if (state.isMultiplayer && i.playerId) {
+                    const p = state.players.find(pl => pl.id == i.playerId);
+                    const pName = p ? p.name : 'Unknown';
+                    playerBadge = `<span class="history-player-badge">${pName}</span>`;
+                }
+
+                return `
+                <div class="history-item">
+                    <div>
+                        ${playerBadge}
+                        <strong style="color:var(--primary)">${i.item}</strong>
+                        <div style="opacity:0.7">${i.chain} • ${i.cals} cal</div>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteItem(${i.id})">X</button>
+                </div>
+            `}).join('') || '<div style="text-align:center; color:#555; font-size:12px; padding:10px;">History Empty</div>';
+        }
+
+        /* --- AUTOCOMPLETE LOGIC --- */
+        // Renamed to avoid conflicts and allow multiple instances if needed, 
+        // though here we just hardcode two setups for simplicity in one file.
+
+        function setupManualAutocomplete() {
+            const input = document.getElementById('input-chain');
+            const drop = document.getElementById('chain-dropdown');
+
+            input.addEventListener('input', (e) => {
+                const val = e.target.value.toLowerCase();
+                if (!val) { drop.classList.remove('show'); return; }
+                const matches = uniqueChains.filter(c => c.toLowerCase().includes(val));
+                if (matches.length === 0) { drop.classList.remove('show'); return; }
+                drop.innerHTML = matches.map(c => 
+                    `<div class="autocomplete-item" onclick="selectManualChain('${c}')">${c}</div>`
+                ).join('');
+                drop.classList.add('show');
+            });
+
+            input.addEventListener('click', () => {
+                if (input.value.trim() !== "") input.dispatchEvent(new Event('input'));
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== input && !drop.contains(e.target)) {
+                    drop.classList.remove('show');
+                }
+            });
+        }
+
+        function selectManualChain(c) {
+            document.getElementById('input-chain').value = c;
+            document.getElementById('chain-dropdown').classList.remove('show');
+        }
+
+        // NEW: Database Chain Filter Autocomplete
+        function setupDBChainAutocomplete() {
+            const input = document.getElementById('db-chain-filter');
+            const drop = document.getElementById('db-chain-dropdown');
+
+            input.addEventListener('input', (e) => {
+                // Also trigger DB filter update on type
+                renderDBList(); 
+
+                const val = e.target.value.toLowerCase();
+                if (!val) { drop.classList.remove('show'); return; }
+                const matches = uniqueChains.filter(c => c.toLowerCase().includes(val));
+                if (matches.length === 0) { drop.classList.remove('show'); return; }
+                
+                drop.innerHTML = matches.map(c => 
+                    `<div class="autocomplete-item" onclick="selectDBChain('${c}')">${c}</div>`
+                ).join('');
+                drop.classList.add('show');
+            });
+
+            input.addEventListener('click', () => {
+                if (input.value.trim() !== "") input.dispatchEvent(new Event('input'));
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== input && !drop.contains(e.target)) {
+                    drop.classList.remove('show');
+                }
+            });
+        }
+
+        function selectDBChain(c) {
+            document.getElementById('db-chain-filter').value = c;
+            document.getElementById('db-chain-dropdown').classList.remove('show');
+            renderDBList(); // Update the list immediately after selection
+        }
+    </script>
+</body>
+</html>
