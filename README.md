@@ -163,5 +163,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 - Made by [@sixtyvari0us](https://twitter.com/sixtyvari0us)
 - Designed for DougDoug food challenge streams
-- Built with vanilla HTML, CSS, and JavaScript
 
