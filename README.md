@@ -1,18 +1,15 @@
 # DougDoug Food Challenge Tracker - OBS Overlay
 
-A beautiful, feature-rich overlay for tracking food challenges in OBS (Open Broadcaster Software). Perfect for streaming food challenges, eating competitions, or any calorie/fat tracking needs.
-
 ![Made by @sixtyvari0us](https://img.shields.io/badge/made%20by-%40sixtyvari0us-blue)
 
 ## Features
 
-- 🎯 **Real-time Tracking**: Live calorie and fat tracking displayed on stream
-- 🏪 **Restaurant Database**: Pre-loaded database with 300+ items from popular chains
-- 👥 **Multiplayer Mode**: Track multiple players/competitors simultaneously
-- 📝 **Manual Entry**: Add custom items not in the database
-- 🔍 **Smart Search**: Quick search and filter by restaurant
-- 📊 **History Tracking**: View and manage recent entries
-- 🎨 **Beautiful UI**: Modern, clean design with customizable display options
+- **Real-time Tracking**: Live calorie and fat tracking displayed on stream
+- **Restaurant Database**: Pre-loaded database with 300+ items from popular chains
+- **Multiplayer Mode**: Track multiple players/competitors simultaneously
+- **Manual Entry**: Add custom items not in the database
+- **Smart Search**: Quick search and filter by restaurant
+- **History Tracking**: View and manage recent entries
 
 ## Supported Restaurants
 
@@ -39,14 +36,13 @@ The database includes items from:
 - Wienerschnitzel
 - Arby's
 - Domino's
-- And more!
 
 ## Installation
 
 1. **Download the overlay file**
-   ```bash
-   git clone https://github.com/christran60/dougdoug-obs-overlay.git
-   ```
+   - Click the green "Code" button on GitHub
+   - Select "Download ZIP"
+   - Extract the ZIP file
 
 ## Setup in OBS
 
@@ -55,11 +51,21 @@ The database includes items from:
 3. Name it "Food Challenge Tracker"
 4. Check **Local file**
 5. Browse to `dd-challenge-overlay.html`
-6. Set Width: `1200px` (or adjust to your preference)
-7. Set Height: `800px` (or adjust to your preference)
+6. Set Width: `1920px` (or adjust to your preference)
+7. Set Height: `1080px` (or adjust to your preference)
 8. Click **OK**
 
+### Crop Out Admin Panel
+
+**Important**: You need to crop out the admin panel on the right side before using the overlay on stream.
+
+1. In OBS, select the Browser Source
+2. Hold **Alt** and drag with **Left Mouse Button** from the right edge
+3. Crop until only the left overlay (HUD) is visible
+4. The admin panel should be completely hidden from the stream view
+
 ### Chroma Key Setup (For Transparent Background)
+
 1. In the Browser Source properties, check **Shutdown source when not visible**
 2. Add a **Chroma Key** filter:
    - Key Color: `#00b140` (green background)
@@ -136,6 +142,14 @@ The database includes items from:
 
 ## Customization
 
+### Adding Custom Items to Database
+
+Edit the `menuDB` array in the JavaScript section:
+
+```javascript
+{ chain: "Your Restaurant", item: "Item Name", cals: 500, fat: 25 },
+```
+
 ### Changing Colors
 
 Edit the CSS variables at the top of the file:
@@ -160,20 +174,13 @@ Change the overlay width:
 }
 ```
 
-### Adding Custom Items to Database
-
-Edit the `menuDB` array in the JavaScript section:
-
-```javascript
-{ chain: "Your Restaurant", item: "Item Name", cals: 500, fat: 25 },
-```
-
 ## Tips & Tricks
 
 - **Quick Entry**: Use the database search for fastest entry - just type and click
 - **Restaurant Autocomplete**: Start typing a restaurant name and select from suggestions
 - **Multiplayer Efficiency**: Set up all players before starting the challenge
 - **History Cleanup**: Regularly delete items if you make mistakes to keep stats accurate
+- **Crop First**: Always crop out the admin panel before going live
 - **Chroma Key**: Use the green background (#00b140) for easy chroma key removal in OBS
 
 ## Troubleshooting
@@ -192,40 +199,13 @@ Edit the `menuDB` array in the JavaScript section:
 - Adjust similarity and smoothness values
 - Make sure the background color hasn't been changed
 
-### Database items not appearing
-- Clear browser cache
-- Check that the menuDB array is properly formatted
-
-## Browser Compatibility
-
-- ✅ Chrome/Edge (Recommended)
-- ✅ Firefox
-- ✅ Safari
-- ⚠️ Internet Explorer (Not supported)
-
-## Contributing
-
-Contributions are welcome! Feel free to:
-- Add more restaurants/items to the database
-- Improve the UI/UX
-- Fix bugs
-- Add new features
-
-## License
-
-This project is open source and available for personal and commercial use.
+### Admin panel still visible
+- Make sure you've cropped the source using Alt+Left Mouse Button
+- Adjust the crop handles until the admin panel is hidden
 
 ## Credits
 
 - Made by [@sixtyvari0us](https://twitter.com/sixtyvari0us)
 - Designed for DougDoug food challenge streams
 - Built with vanilla HTML, CSS, and JavaScript
-
-## Support
-
-For issues, questions, or suggestions, please open an issue on GitHub.
-
----
-
-**Enjoy your food challenges! 🍔🍕🌮**
 
