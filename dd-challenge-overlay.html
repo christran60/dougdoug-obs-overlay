@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>DougDoug Food Challenge Tracker (Compact List)</title>
+    <title>DougDoug Food Challenge Tracker (Fixed Logic)</title>
     <style>
         /* Load fancy fonts */
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@700;900&display=swap');
@@ -102,7 +102,7 @@
             color: #aaa;
             text-transform: uppercase;
             font-weight: 800;
-            margin-bottom: 8px; /* Reduced margin */
+            margin-bottom: 8px; 
             border-bottom: 2px solid rgba(255,255,255,0.1);
             padding-bottom: 6px;
             margin-left: -15px; 
@@ -119,9 +119,7 @@
         }
 
         .res-list li {
-            /* COMPACT SIZE: Reduced from 20px to 17px */
             font-size: 17px; 
-            /* TIGHTER SPACING: Reduced from 8px to 4px */
             margin-bottom: 4px; 
             padding-left: 5px;
             line-height: 1.2;
@@ -130,7 +128,7 @@
         .res-list-item-content {
             color: #fff; 
             display: inline-block;
-            word-wrap: break-word; /* Allow wrapping if absolutely necessary, but avoids cut-off */
+            word-wrap: break-word; 
         }
 
         /* --- Right Column: Players --- */
@@ -1100,14 +1098,18 @@
             render();
         }
 
-        /* --- NEW DB LOGIC --- */
+        /* --- NEW DB LOGIC (FIXED) --- */
         function renderDBList() {
             const query = document.getElementById('db-search').value.toLowerCase();
             const filterChain = document.getElementById('db-chain-filter').value.toLowerCase(); // Get text input
             const container = document.getElementById('db-list-container');
             
-            // Filter
-            const matches = menuDB.filter(f => {
+            // 1. Map original items to preserve their actual index in the master list
+            // This fixes the issue where clicking an item adds the wrong one if names are duplicates
+            const indexedDB = menuDB.map((item, index) => ({ ...item, originalIndex: index }));
+
+            // 2. Filter based on the indexed list
+            const matches = indexedDB.filter(f => {
                 const matchesText = f.item.toLowerCase().includes(query) || f.chain.toLowerCase().includes(query);
                 // Smart matching for the chain filter
                 const matchesChain = filterChain === "" || f.chain.toLowerCase().includes(filterChain);
@@ -1119,9 +1121,9 @@
                 return;
             }
 
-            container.innerHTML = matches.map((f, index) => {
+            container.innerHTML = matches.map((f) => {
                 return `
-                <div class="db-list-item" onclick="addFromDB('${f.item.replace(/'/g, "\\'")}')">
+                <div class="db-list-item" onclick="addFromDB(${f.originalIndex})">
                     <div>
                         <div class="db-item-name">${f.item}</div>
                         <div class="db-item-sub">${f.chain}</div>
@@ -1132,8 +1134,9 @@
             }).join('');
         }
 
-        function addFromDB(itemName) {
-            const food = menuDB.find(f => f.item === itemName); 
+        function addFromDB(index) {
+            // FIXED: Lookup by unique index instead of name
+            const food = menuDB[index]; 
             if (!food) return;
 
             const playerId = state.isMultiplayer ? state.activePlayerId : null;

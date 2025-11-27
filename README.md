@@ -48,7 +48,7 @@ The database includes items from:
 
 1. In OBS, click **+** in Sources
 2. Select **Browser Source**
-3. Name it "Food Challenge Tracker"
+3. Name it whatever
 4. Check **Local file**
 5. Browse to `dd-challenge-overlay.html`
 6. Set Width: `1920px` (or adjust to your preference)
@@ -67,11 +67,7 @@ The database includes items from:
 ### Chroma Key Setup (For Transparent Background)
 
 1. In the Browser Source properties, check **Shutdown source when not visible**
-2. Add a **Chroma Key** filter:
-   - Key Color: `#00b140` (green background)
-   - Similarity: `400`
-   - Smoothness: `80`
-   - Click **OK**
+2. Add a **Chroma Key** filter
 
 ## Usage
 
@@ -150,30 +146,6 @@ Edit the `menuDB` array in the JavaScript section:
 { chain: "Your Restaurant", item: "Item Name", cals: 500, fat: 25 },
 ```
 
-### Changing Colors
-
-Edit the CSS variables at the top of the file:
-
-```css
-:root {
-    --primary: #978DB9;        /* Main accent color */
-    --primary-glow: rgba(151, 141, 185, 0.6);
-    --bg-glass: rgba(16, 16, 20, 1);
-    --text-white: #ffffff;
-    --danger: #ef4444;
-}
-```
-
-### Adjusting Overlay Size
-
-Change the overlay width:
-
-```css
-:root {
-    --overlay-width: 600px;  /* Adjust to your preference */
-}
-```
-
 ## Tips & Tricks
 
 - **Quick Entry**: Use the database search for fastest entry - just type and click
@@ -183,29 +155,8 @@ Change the overlay width:
 - **Crop First**: Always crop out the admin panel before going live
 - **Chroma Key**: Use the green background (#00b140) for easy chroma key removal in OBS
 
-## Troubleshooting
-
-### Overlay not showing in OBS
-- Make sure the file path is correct
-- Check that the Browser Source is enabled
-- Verify the local file checkbox is checked
-
-### Stats not updating
-- Refresh the browser source in OBS
-- Check browser console for errors (F12)
-
-### Chroma key not working
-- Verify the key color matches exactly: `#00b140`
-- Adjust similarity and smoothness values
-- Make sure the background color hasn't been changed
-
-### Admin panel still visible
-- Make sure you've cropped the source using Alt+Left Mouse Button
-- Adjust the crop handles until the admin panel is hidden
-
 ## Credits
 
 - Made by [@sixtyvari0us](https://twitter.com/sixtyvari0us)
 - Designed for DougDoug food challenge streams
-- Built with vanilla HTML, CSS, and JavaScript
 
