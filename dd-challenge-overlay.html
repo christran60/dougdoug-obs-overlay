@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <title>DougDoug Food Challenge Tracker (Fixed Logic)</title>
     <style>
-        /* Load fancy fonts */
+        
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@700;900&display=swap');
 
         :root {
-            /* Theme Colors */
+            
             --primary: #978DB9; 
             --primary-glow: rgba(151, 141, 185, 0.6);
             --bg-glass: rgba(16, 16, 20, 1);
             --text-white: #ffffff;
             --danger: #ef4444;
             
-            /* Overlay Width - 600px looks good on 1440p */
+            
             --overlay-width: 600px; 
         }
 
@@ -28,15 +28,13 @@
             overflow: hidden;
             display: flex;
 
-            /* --- SHARPNESS FIXES --- */
+            
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: geometricPrecision; 
         }
 
-        /* =========================================
-           AREA 1: THE STREAM OVERLAY (HUD)
-           ========================================= */
+        
         #stream-hud {
             width: var(--overlay-width);
             height: 100%;
@@ -47,11 +45,11 @@
             grid-template-rows: auto 1fr;
             gap: 25px;
             align-content: start;
-            /* Slightly transparent dark for visibility if testing without Chroma Key */
+            
             background-color: #00b140; 
         }
 
-        /* --- Left Column: Stats & Restaurants --- */
+        
         .hud-left-col {
             display: flex;
             flex-direction: column;
@@ -92,7 +90,7 @@
         .hud-list-container {
             background: #151515;
             border-radius: 16px;
-            /* Tighter padding to save space */
+            
             padding: 15px 15px 15px 30px; 
             border: 1px solid rgba(255,255,255,0.1);
         }
@@ -108,7 +106,7 @@
             margin-left: -15px; 
         }
 
-        /* --- COMPACT LIST --- */
+        
         .res-list {
             margin: 0;
             padding: 0;
@@ -131,7 +129,7 @@
             word-wrap: break-word; 
         }
 
-        /* --- Right Column: Players --- */
+        
         .hud-right-col {
             display: flex;
             flex-direction: column;
@@ -152,9 +150,7 @@
         .p-stats { color: #fff; font-weight: 700; font-size: 18px; font-family: 'Fredoka', 'Segoe UI', Arial, sans-serif; }
         .p-stat-detail { font-size: 12px; color: #aaa; margin-left: 2px; }
 
-        /* =========================================
-           AREA 2: ADMIN PANEL
-           ========================================= */
+        
         #admin-panel {
             flex: 1;
             background: #1a1a1a;
@@ -215,7 +211,7 @@
             display: block;
         }
 
-        /* Inputs & Selects */
+        
         input[type="text"], input[type="number"], select {
             width: 100%; background: #111; border: 1px solid #444; color: #fff;
             padding: 10px; border-radius: 6px; font-family: 'Nunito', 'Segoe UI', sans-serif;
@@ -223,7 +219,7 @@
         }
         input:focus, select:focus { outline: none; border-color: var(--primary); background: #000; }
 
-        /* Buttons */
+        
         .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 800; cursor: pointer; 
                font-family: 'Fredoka', 'Segoe UI', sans-serif; text-transform: uppercase; }
         .btn-primary { background: var(--primary); color: #000; }
@@ -232,7 +228,7 @@
         .btn-danger:hover { background: var(--danger); color: #fff; }
         .btn-small { padding: 6px 10px; width: auto; font-size: 12px; }
 
-        /* Player Select Buttons */
+        
         .player-select-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -257,26 +253,26 @@
         .player-select-btn:hover { background: rgba(255,255,255,0.1); }
         .player-select-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
 
-        /* Manage Players List */
+        
         .manage-player-row { display: flex; gap: 10px; margin-bottom: 6px; align-items: center; }
         .manage-player-input { background: #111 !important; border: 1px solid #444 !important; margin-bottom: 0 !important; padding: 6px !important; }
         .manage-player-input:focus { border-color: var(--primary) !important; }
 
-        /* Toggles */
+        
         .toggle-row { display: flex; align-items: center; gap: 15px; margin-top: 5px; }
         .toggle-item { display: flex; align-items: center; gap: 6px; }
         .toggle-label { color: #fff; font-size: 13px; cursor: pointer; }
 
-        /* History Items */
+        
         .history-item { display: flex; justify-content: space-between; align-items: center; background: #151515; padding: 8px; border-radius: 4px; margin-bottom: 5px; font-size: 12px; color: #ccc; border-left: 2px solid #444; }
         .history-player-badge { background: #333; color: var(--primary); padding: 2px 6px; border-radius: 4px; font-size: 10px; text-transform: uppercase; font-weight: 700; margin-right: 6px; }
 
-        /* Scrollbars */
+        
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #111; }
         ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
 
-        /* Autocomplete */
+        
         .autocomplete-container { position: relative; }
         .autocomplete-dropdown { 
             position: absolute; top: 100%; left: 0; right: 0; 
@@ -291,7 +287,7 @@
         .autocomplete-item { padding: 8px; color: #fff; cursor: pointer; font-size: 12px; }
         .autocomplete-item:hover { background: var(--primary); color: #000; }
 
-        /* Database Scroll List */
+        
         .db-scroll-list {
             max-height: 250px;
             overflow-y: auto;
@@ -326,7 +322,7 @@
 
         .hidden { display: none !important; }
         
-        /* Section Divider */
+        
         .section-divider {
             display: flex;
             align-items: center;
@@ -463,11 +459,9 @@
         </div> </div>
 
     <script>
-        /* ================= DATA & STATE ================= */
-        // --- FINALIZED MENU DATABASE (2025) ---
+        
         const menuDB = [
 
-            // --- GENERAL DRINKS ---
             { chain: "General Drinks", item: "Large Soda (Coke/Pepsi)", cals: 290, fat: 0 },
             { chain: "General Drinks", item: "Medium Soda", cals: 200, fat: 0 },
             { chain: "General Drinks", item: "Small Soda", cals: 150, fat: 0 },
@@ -482,7 +476,6 @@
             { chain: "General Drinks", item: "Coffee (Cream/Sugar)", cals: 120, fat: 6 },
             { chain: "General Drinks", item: "Energy Drink (Red Bull/Monster)", cals: 110, fat: 0 },
 
-            // --- MCDONALD'S ---
             { chain: "McDonalds", item: "Big Mac", cals: 590, fat: 34 },
             { chain: "McDonalds", item: "Quarter Pounder w/ Cheese", cals: 520, fat: 26 },
             { chain: "McDonalds", item: "Double Quarter Pounder", cals: 740, fat: 42 },
@@ -512,7 +505,6 @@
             { chain: "McDonalds", item: "Chocolate Shake (Medium)", cals: 620, fat: 17 },
             { chain: "McDonalds", item: "Vanilla Shake (Medium)", cals: 570, fat: 15 },
 
-            // --- TACO BELL ---
             { chain: "Taco Bell", item: "Crunchy Taco", cals: 170, fat: 9 },
             { chain: "Taco Bell", item: "Crunchy Taco Supreme", cals: 190, fat: 11 },
             { chain: "Taco Bell", item: "Soft Taco", cals: 180, fat: 9 },
@@ -546,7 +538,6 @@
             { chain: "Taco Bell", item: "Baja Blast (Large)", cals: 420, fat: 0 },
             { chain: "Taco Bell", item: "Baja Blast Freeze (Regular)", cals: 150, fat: 0 },
 
-            // --- BURGER KING ---
             { chain: "Burger King", item: "Whopper", cals: 670, fat: 40 },
             { chain: "Burger King", item: "Whopper w/ Cheese", cals: 760, fat: 47 },
             { chain: "Burger King", item: "Double Whopper", cals: 920, fat: 58 },
@@ -565,7 +556,6 @@
             { chain: "Burger King", item: "Bacon, Egg & Cheese Biscuit", cals: 420, fat: 26 },
             { chain: "Burger King", item: "Hash Browns (Medium)", cals: 540, fat: 36 },
 
-            // --- WENDY'S ---
             { chain: "Wendy's", item: "Dave's Single", cals: 590, fat: 37 },
             { chain: "Wendy's", item: "Dave's Double", cals: 860, fat: 57 },
             { chain: "Wendy's", item: "Dave's Triple", cals: 1160, fat: 78 },
@@ -585,7 +575,6 @@
             { chain: "Wendy's", item: "Chocolate Frosty (Medium)", cals: 410, fat: 11 },
             { chain: "Wendy's", item: "Vanilla Frosty (Medium)", cals: 410, fat: 10 },
 
-            // --- KFC ---
             { chain: "KFC", item: "Original Recipe Breast", cals: 390, fat: 21 },
             { chain: "KFC", item: "Original Recipe Drumstick", cals: 130, fat: 8 },
             { chain: "KFC", item: "Original Recipe Thigh", cals: 280, fat: 19 },
@@ -608,7 +597,6 @@
             { chain: "KFC", item: "Mashed Potatoes w/ Gravy", cals: 130, fat: 4 },
             { chain: "KFC", item: "Biscuit", cals: 180, fat: 8 },
 
-            // --- CHICK-FIL-A ---
             { chain: "Chick-fil-A", item: "Chicken Sandwich", cals: 420, fat: 18 },
             { chain: "Chick-fil-A", item: "Spicy Chicken Sandwich", cals: 450, fat: 19 },
             { chain: "Chick-fil-A", item: "Chicken Deluxe Sandwich", cals: 490, fat: 22 },
@@ -632,7 +620,6 @@
             { chain: "Chick-fil-A", item: "Milkshake (Cookies & Cream)", cals: 630, fat: 25 },
             { chain: "Chick-fil-A", item: "Frosted Lemonade", cals: 330, fat: 6 },
 
-            // --- IN-N-OUT ---
             { chain: "In-N-Out", item: "Double-Double w/ Onion", cals: 610, fat: 34 },
             { chain: "In-N-Out", item: "Double-Double Protein Style", cals: 460, fat: 32 },
             { chain: "In-N-Out", item: "Cheeseburger w/ Onion", cals: 430, fat: 21 },
@@ -644,7 +631,6 @@
             { chain: "In-N-Out", item: "Strawberry Shake", cals: 610, fat: 30 },
             { chain: "In-N-Out", item: "Vanilla Shake", cals: 590, fat: 31 },
 
-            // --- SUBWAY ---
             { chain: "Subway", item: "#1 The Philly (6 inch)", cals: 500, fat: 25 },
             { chain: "Subway", item: "#2 The Outlaw (6 inch)", cals: 490, fat: 22 },
             { chain: "Subway", item: "#3 The Monster (6 inch)", cals: 580, fat: 30 },
@@ -668,7 +654,6 @@
             { chain: "Subway", item: "Sidekick: Footlong Churro", cals: 190, fat: 9 },
             { chain: "Subway", item: "Chocolate Chip Cookie", cals: 210, fat: 10 },
 
-            // --- DUNKIN' ---
             { chain: "Dunkin", item: "Glazed Donut", cals: 240, fat: 11 },
             { chain: "Dunkin", item: "Chocolate Frosted Donut", cals: 260, fat: 11 },
             { chain: "Dunkin", item: "Boston Kreme Donut", cals: 270, fat: 11 },
@@ -687,7 +672,6 @@
             { chain: "Dunkin", item: "Cookie Butter Cold Brew (Medium)", cals: 200, fat: 3.5 },
             { chain: "Dunkin", item: "Frozen Coffee (Medium)", cals: 410, fat: 4.5 },
 
-            // --- JOLLIBEE ---
             { chain: "Jollibee", item: "Chickenjoy Drumstick (1pc)", cals: 220, fat: 14 },
             { chain: "Jollibee", item: "Chickenjoy Thigh (1pc)", cals: 380, fat: 28 },
             { chain: "Jollibee", item: "Spicy Chickenjoy Drumstick", cals: 240, fat: 14 },
@@ -704,7 +688,6 @@
             { chain: "Jollibee", item: "Pineapple Quencher", cals: 180, fat: 0 },
             { chain: "Jollibee", item: "Coconut Dream Freeze", cals: 240, fat: 6 },
 
-            // --- EL POLLO LOCO ---
             { chain: "El Pollo Loco", item: "Chicken Leg (1pc)", cals: 110, fat: 7 },
             { chain: "El Pollo Loco", item: "Chicken Thigh (1pc)", cals: 200, fat: 12 },
             { chain: "El Pollo Loco", item: "Chicken Breast (1pc)", cals: 200, fat: 8 },
@@ -728,7 +711,6 @@
             { chain: "El Pollo Loco", item: "Corn (Small)", cals: 140, fat: 4.5 },
             { chain: "El Pollo Loco", item: "Creamy Cilantro Dressing", cals: 310, fat: 33 },
 
-            // --- DEL TACO ---
             { chain: "Del Taco", item: "The Del Taco (Crunchy)", cals: 300, fat: 20 },
             { chain: "Del Taco", item: "The Del Taco (Soft)", cals: 290, fat: 10 },
             { chain: "Del Taco", item: "Snack Taco (Crunchy)", cals: 120, fat: 3 },
@@ -758,7 +740,6 @@
             { chain: "Del Taco", item: "Strawberry Shake (Regular)", cals: 520, fat: 9 },
             { chain: "Del Taco", item: "Vanilla Shake (Regular)", cals: 480, fat: 9 },
 
-            // --- THE HABIT BURGER GRILL ---
             { chain: "The Habit", item: "Charburger", cals: 500, fat: 31 },
             { chain: "The Habit", item: "Double Char", cals: 730, fat: 49 },
             { chain: "The Habit", item: "Santa Barbara Char", cals: 1210, fat: 93 },
@@ -775,7 +756,6 @@
             { chain: "The Habit", item: "Chocolate Shake", cals: 690, fat: 27 },
             { chain: "The Habit", item: "Cookies & Cream Shake", cals: 800, fat: 34 },
 
-            // --- FATBURGER ---
             { chain: "Fatburger", item: "Small 'Baby Fat' Burger", cals: 400, fat: 21 },
             { chain: "Fatburger", item: "Medium 'Original' Fatburger", cals: 590, fat: 31 },
             { chain: "Fatburger", item: "Large 'Kingburger'", cals: 850, fat: 41 },
@@ -796,7 +776,6 @@
             { chain: "Fatburger", item: "Cookies & Cream Shake", cals: 1180, fat: 59 },
             { chain: "Fatburger", item: "Maui-Banana Shake", cals: 940, fat: 44 },
 
-            // --- DAVE'S HOT CHICKEN ---
             { chain: "Dave's Hot Chicken", item: "Combo #1 (2 Tenders)", cals: 1230, fat: 58 },
             { chain: "Dave's Hot Chicken", item: "Combo #2 (2 Sliders)", cals: 1500, fat: 75 },
             { chain: "Dave's Hot Chicken", item: "Combo #3 (1 Tender, 1 Slider)", cals: 1370, fat: 67 },
@@ -813,7 +792,6 @@
             { chain: "Dave's Hot Chicken", item: "Milkshake (Regular)", cals: 610, fat: 47 },
             { chain: "Dave's Hot Chicken", item: "Milkshake (Large)", cals: 760, fat: 58 },
 
-            // --- JACK IN THE BOX --- 2025 Update
             { chain: "Jack in the Box", item: "Two Tacos (Regular)", cals: 340, fat: 19 },
             { chain: "Jack in the Box", item: "Sourdough Jack", cals: 700, fat: 45 },
             { chain: "Jack in the Box", item: "Jumbo Jack w/ Cheese", cals: 570, fat: 30 },
@@ -830,7 +808,6 @@
             { chain: "Jack in the Box", item: "Oreo Cookie Shake (Regular 16oz)", cals: 690, fat: 28 },
             { chain: "Jack in the Box", item: "Chocolate Shake (Regular 16oz)", cals: 780, fat: 38 },
 
-            // --- CARL'S JR. --- 2025 Update
             { chain: "Carl's Jr.", item: "Famous Star w/ Cheese", cals: 670, fat: 39 },
             { chain: "Carl's Jr.", item: "Western Bacon Cheeseburger", cals: 780, fat: 36 },
             { chain: "Carl's Jr.", item: "Super Star w/ Cheese", cals: 930, fat: 57 },
@@ -845,7 +822,6 @@
             { chain: "Carl's Jr.", item: "Jalapeno Poppers (6pc)", cals: 370, fat: 22 },
             { chain: "Carl's Jr.", item: "Onion Rings", cals: 560, fat: 30 },
 
-            // --- POPEYES (2025 Update) ---
             { chain: "Popeyes", item: "Classic Chicken Sandwich", cals: 700, fat: 42 },
             { chain: "Popeyes", item: "Spicy Chicken Sandwich", cals: 700, fat: 42 },
             { chain: "Popeyes", item: "Signature Chicken (Leg - Mild)", cals: 160, fat: 9 },
@@ -864,7 +840,6 @@
             { chain: "Popeyes", item: "Ghost Pepper Wings (6pc)", cals: 670, fat: 38 },
             { chain: "Popeyes", item: "Sweet & Spicy Wings (6pc)", cals: 880, fat: 44 },
 
-            // --- ORIGINAL TOMMY'S (Updated 2022 Data) ---
             { chain: "Tommy's", item: "Chili Cheeseburger (Single)", cals: 530, fat: 28 },
             { chain: "Tommy's", item: "Chili Cheeseburger (Double)", cals: 710, fat: 39 },
             { chain: "Tommy's", item: "Chili Cheeseburger (Triple)", cals: 950, fat: 56 },
@@ -880,7 +855,6 @@
             { chain: "Tommy's", item: "Breakfast Burrito", cals: 980, fat: 67 },
             { chain: "Tommy's", item: "Root Beer Float", cals: 370, fat: 8 },
 
-            // --- WIENERSCHNITZEL (2025 Update) ---
             { chain: "Wienerschnitzel", item: "Chili Cheese Dog", cals: 350, fat: 20 },
             { chain: "Wienerschnitzel", item: "Chili Dog", cals: 300, fat: 15 },
             { chain: "Wienerschnitzel", item: "Mustard Dog", cals: 280, fat: 14 },
@@ -896,7 +870,6 @@
             { chain: "Wienerschnitzel", item: "Tastee-Freez Chocolate Shake", cals: 880, fat: 30 },
             { chain: "Wienerschnitzel", item: "Tastee-Freez Oreo Shake", cals: 880, fat: 31 },
 
-            // --- ARBY'S (2025 Update) ---
             { chain: "Arby's", item: "Classic Roast Beef", cals: 360, fat: 14 },
             { chain: "Arby's", item: "Double Roast Beef", cals: 510, fat: 24 },
             { chain: "Arby's", item: "Half Pound Roast Beef", cals: 610, fat: 30 },
@@ -922,7 +895,6 @@
             { chain: "Arby's", item: "Vanilla Shake (Regular)", cals: 480, fat: 17 },
             { chain: "Arby's", item: "Apple Turnover", cals: 430, fat: 18 },
 
-            // --- DOMINO'S PIZZA (2025 Update) ---
             { chain: "Domino's", item: "Cheese Pizza (Large Slice)", cals: 290, fat: 11 },
             { chain: "Domino's", item: "Pepperoni Pizza (Large Slice)", cals: 320, fat: 13 },
             { chain: "Domino's", item: "Sausage Pizza (Large Slice)", cals: 320, fat: 13 },
@@ -968,7 +940,7 @@
 
         window.onload = () => {
             setupManualAutocomplete();
-            setupDBChainAutocomplete(); // New function for DB Filter
+            setupDBChainAutocomplete();
             renderDBList(); 
             render(); 
         };
@@ -1092,26 +1064,21 @@
             document.getElementById('input-cals').value = '';
             document.getElementById('input-fat').value = '';
             
-            // NOTE: Chain input is NOT cleared
             document.getElementById('input-item').focus();
             
             render();
         }
 
-        /* --- NEW DB LOGIC (FIXED) --- */
+        
         function renderDBList() {
             const query = document.getElementById('db-search').value.toLowerCase();
-            const filterChain = document.getElementById('db-chain-filter').value.toLowerCase(); // Get text input
+            const filterChain = document.getElementById('db-chain-filter').value.toLowerCase();
             const container = document.getElementById('db-list-container');
             
-            // 1. Map original items to preserve their actual index in the master list
-            // This fixes the issue where clicking an item adds the wrong one if names are duplicates
             const indexedDB = menuDB.map((item, index) => ({ ...item, originalIndex: index }));
 
-            // 2. Filter based on the indexed list
             const matches = indexedDB.filter(f => {
                 const matchesText = f.item.toLowerCase().includes(query) || f.chain.toLowerCase().includes(query);
-                // Smart matching for the chain filter
                 const matchesChain = filterChain === "" || f.chain.toLowerCase().includes(filterChain);
                 return matchesText && matchesChain;
             });
@@ -1135,7 +1102,6 @@
         }
 
         function addFromDB(index) {
-            // FIXED: Lookup by unique index instead of name
             const food = menuDB[index]; 
             if (!food) return;
 
@@ -1166,7 +1132,6 @@
         }
 
         function render() {
-            // Check Fat Toggle State
             const fatCard = document.getElementById('hud-fat-card');
             if (state.showFat) {
                 fatCard.classList.remove('hidden');
@@ -1174,12 +1139,9 @@
                 fatCard.classList.add('hidden');
             }
 
-            // Calculate Totals
             let totalCals = 0;
             let totalFat = 0;
             
-            // --- UPDATED LOGIC FOR RESTAURANT LIST ---
-            // List unique restaurants in order of first appearance
             const seenChains = new Set();
             const orderedChains = [];
 
@@ -1198,7 +1160,6 @@
             document.getElementById('hud-cals').innerText = totalCals.toLocaleString();
             document.getElementById('hud-fat').innerHTML = `${totalFat.toFixed(1)} <span class="hud-unit">g</span>`;
 
-            // Update HUD Restaurants (TIMELINE ORDER)
             const resContainer = document.getElementById('hud-restaurants');
             
             if (orderedChains.length === 0) {
@@ -1215,7 +1176,6 @@
                 '</ol>';
             }
 
-            // Render Multiplayer HUD
             if (state.isMultiplayer) {
                 const pContainer = document.getElementById('hud-multiplayer-area');
                 pContainer.innerHTML = state.players.map(p => {
@@ -1238,7 +1198,6 @@
                 }).join('');
             }
 
-            // Render Admin History
             const histList = document.getElementById('history-list');
             histList.innerHTML = state.items.slice().reverse().map(i => {
                 let playerBadge = '';
@@ -1260,9 +1219,7 @@
             `}).join('') || '<div style="text-align:center; color:#555; font-size:12px; padding:10px;">History Empty</div>';
         }
 
-        /* --- AUTOCOMPLETE LOGIC --- */
-        // Renamed to avoid conflicts and allow multiple instances if needed, 
-        // though here we just hardcode two setups for simplicity in one file.
+        
 
         function setupManualAutocomplete() {
             const input = document.getElementById('input-chain');
@@ -1295,13 +1252,11 @@
             document.getElementById('chain-dropdown').classList.remove('show');
         }
 
-        // NEW: Database Chain Filter Autocomplete
         function setupDBChainAutocomplete() {
             const input = document.getElementById('db-chain-filter');
             const drop = document.getElementById('db-chain-dropdown');
 
             input.addEventListener('input', (e) => {
-                // Also trigger DB filter update on type
                 renderDBList(); 
 
                 const val = e.target.value.toLowerCase();
@@ -1329,7 +1284,7 @@
         function selectDBChain(c) {
             document.getElementById('db-chain-filter').value = c;
             document.getElementById('db-chain-dropdown').classList.remove('show');
-            renderDBList(); // Update the list immediately after selection
+            renderDBList();
         }
     </script>
 </body>
