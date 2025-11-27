@@ -48,15 +48,8 @@ The database includes items from:
    git clone https://github.com/christran60/dougdoug-obs-overlay.git
    ```
 
-2. **Open in OBS**
-   - Open OBS Studio
-   - Add a new **Browser Source**
-   - Set the URL to the local file path: `file:///path/to/dd-challenge-overlay.html`
-   - Or use a local web server (recommended)
-
 ## Setup in OBS
 
-### Method 1: Local File (Simple)
 1. In OBS, click **+** in Sources
 2. Select **Browser Source**
 3. Name it "Food Challenge Tracker"
@@ -65,17 +58,6 @@ The database includes items from:
 6. Set Width: `1200px` (or adjust to your preference)
 7. Set Height: `800px` (or adjust to your preference)
 8. Click **OK**
-
-### Method 2: Local Web Server (Recommended)
-1. Start a local web server:
-   ```bash
-   # Python 3
-   python3 -m http.server 8000
-   
-   # Or Node.js
-   npx http-server -p 8000
-   ```
-2. In OBS Browser Source, use: `http://localhost:8000/dd-challenge-overlay.html`
 
 ### Chroma Key Setup (For Transparent Background)
 1. In the Browser Source properties, check **Shutdown source when not visible**
@@ -198,8 +180,8 @@ Edit the `menuDB` array in the JavaScript section:
 
 ### Overlay not showing in OBS
 - Make sure the file path is correct
-- Try using a local web server instead of file://
 - Check that the Browser Source is enabled
+- Verify the local file checkbox is checked
 
 ### Stats not updating
 - Refresh the browser source in OBS
